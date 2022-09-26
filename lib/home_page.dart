@@ -63,37 +63,39 @@ class _ToDoAppState extends State<ToDoApp> {
                         ),
                         IconButton(
                           color: Colors.black,
-                          onPressed: () {
-                            setState(() {
-                              showDialog(
-                                context: context,
-                                builder: ((context) => SimpleDialog(
-                                      children: [
-                                        TextFormField(
-                                          onChanged: ((value) {
-                                            setState(() {
-                                              text = value;
-                                            });
-                                          }),
-                                          initialValue:
-                                              todo.keys.toList()[index],
-                                        ),
-                                        ElevatedButton(
-                                            onPressed: (() {
-                                              setState(() {
-                                                todo[text] = false;
-                                                todo.remove(
-                                                    todo.keys.toList()[index]);
-                                              });
-                                              Navigator.pop(context);
-                                              //print(todo);
-                                            }),
-                                            child: Text("Güncelle")),
-                                      ],
-                                    )),
-                              );
-                            });
-                          },
+                          onPressed: todo.values.toList()[index]
+                              ? null
+                              : () {
+                                  setState(() {
+                                    showDialog(
+                                      context: context,
+                                      builder: ((context) => SimpleDialog(
+                                            children: [
+                                              TextFormField(
+                                                onChanged: ((value) {
+                                                  setState(() {
+                                                    text = value;
+                                                  });
+                                                }),
+                                                initialValue:
+                                                    todo.keys.toList()[index],
+                                              ),
+                                              ElevatedButton(
+                                                  onPressed: (() {
+                                                    setState(() {
+                                                      todo[text] = false;
+                                                      todo.remove(todo.keys
+                                                          .toList()[index]);
+                                                    });
+                                                    Navigator.pop(context);
+                                                    //print(todo);
+                                                  }),
+                                                  child: Text("Güncelle")),
+                                            ],
+                                          )),
+                                    );
+                                  });
+                                },
                           icon: const Icon(Icons.edit),
                         ),
                       ],
