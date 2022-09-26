@@ -15,11 +15,9 @@ class _ToDoAppState extends State<ToDoApp> {
     "Task 4": false,
   };
 
-  bool isEditing = false;
-
   TextEditingController userInput = TextEditingController();
-  //TextEditingController userEdit = TextEditingController();
 
+  String text = "";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,8 +65,33 @@ class _ToDoAppState extends State<ToDoApp> {
                           color: Colors.black,
                           onPressed: () {
                             setState(() {
-                              isEditing = !isEditing;
-                              // Serdar Bey'e sormayı unutma !!
+                              showDialog(
+                                context: context,
+                                builder: ((context) => SimpleDialog(
+                                      children: [
+                                        TextFormField(
+                                          onChanged: ((value) {
+                                            setState(() {
+                                              text = value;
+                                            });
+                                          }),
+                                          initialValue:
+                                              todo.keys.toList()[index],
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: (() {
+                                              setState(() {
+                                                todo[text] = false;
+                                                todo.remove(
+                                                    todo.keys.toList()[index]);
+                                              });
+                                              Navigator.pop(context);
+                                              //print(todo);
+                                            }),
+                                            child: Text("Güncelle")),
+                                      ],
+                                    )),
+                              );
                             });
                           },
                           icon: const Icon(Icons.edit),
