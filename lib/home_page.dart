@@ -23,6 +23,7 @@ import 'dart:convert';
 ///
 ///
 /// Shared Preferences için adımlar:
+/// 0- Json serialization araştırılması gerken konular. Dart:Convert kütüphanesi ve JsonToDart plugini
 /// 1- Todo Nesnesinin json string olarak kaydedilmesi
 /// 2- Json nesnesinden todo objelerinin oluşturulması
 class TodoItem {
