@@ -142,6 +142,7 @@ class _ToDoAppState extends State<ToDoApp> {
   }
 
   void _onTapUpdateRow(TodoItem item) {
+    text = item.text; ///Açışılta initialize edilmesi gerek.
     showDialog(
       context: context,
       builder: ((context) => SimpleDialog(
