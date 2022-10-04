@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
 ///Yorumlar
 ///Öncelikle eline sağlık, uygulama güzel çalışıyor. İlk aşamayı topaladığına göre mevcut yapıda birkaç geri bildirimim olucak.
 /// 1- Kod yazarken her zaman aklında olması gereken ilk kural DRY prensibi, yani "Don't repeat yourself". İlk gözüme çarpan şey kimi parametrelerin tekrarlayan yapıca olması oldu. Örnek;
@@ -32,16 +33,13 @@ class TodoItem {
   File? file;
   TodoItem(this.text, this.isChecked, this.file);
 
-  Map<String,dynamic> toJson(){
-    return {
-      "text":text,
-      "isChecked":isChecked,
-      "file":file?.path
-    };
+  Map<String, dynamic> toJson() {
+    return {"text": text, "isChecked": isChecked, "file": file?.path};
   }
 
-  static TodoItem fromJson(Map<String,dynamic> json){
-    return TodoItem(json["text"], json["isChecked"], json["file"] == null ? null : File(json["file"]));
+  static TodoItem fromJson(Map<String, dynamic> json) {
+    return TodoItem(json["text"], json["isChecked"],
+        json["file"] == null ? null : File(json["file"]));
   }
 }
 
@@ -53,12 +51,9 @@ class ToDoApp extends StatefulWidget {
 }
 
 class _ToDoAppState extends State<ToDoApp> {
-
-
   final FocusNode focusNode = FocusNode();
 
-  List<TodoItem> items =
-      List.generate(4, (index) => TodoItem("Todo Item $index", false, null));
+  List<TodoItem> items = [];
 
   TextEditingController userInput = TextEditingController();
 
@@ -70,80 +65,100 @@ class _ToDoAppState extends State<ToDoApp> {
   @override
   void initState() {
     super.initState();
-    _initSharedPrefs();
+    //_initSharedPrefs();
+    _loadPrefs();
   }
 
-  void _initSharedPrefs() async{
+  /*void _initSharedPrefs() async {
     sharedPreferences = await SharedPreferences.getInstance();
+  }*/
+
+  void _loadPrefs() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var todoString = sharedPreferences.get("todo");
+
+    print("---LOAD----");
+    setState(() {
+      if (todoString is String) {
+        var todoItems = jsonDecode(todoString);
+        if (todoItems is List) {
+          // for (var json in todoItems) {
+          //   items.add(TodoItem.fromJson(json));
+          // }
+          items = todoItems.map((e) => TodoItem.fromJson(e)).toList();
+        }
+      }
+    });
   }
 
-  void _loadPrefs() async{
-     var todoString = sharedPreferences.get("todo");
-     if (todoString is String) {
-       var todoItems = jsonDecode(todoString);
-       if(todoItems is List){
-         /// Standart iteratif yaklaşım
-         // for (var json in todoItems) {
-         //   items.add(TodoItem.fromJson(json));
-         // }
-
-         /// Fonksiyonel yaklaşım
-         items = todoItems.map((e) => TodoItem.fromJson(e)).toList();
-       }
-     }
+  _savePrefs() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String json = jsonEncode(items);
+    print("***SAVE***");
+    sharedPreferences.setString("todo", json);
   }
 
   _onTapTakePhotoWithCamera(TodoItem item) async {
     var img = await image.pickImage(source: ImageSource.camera);
     setState(() {
       item.file = File(img!.path);
+      _savePrefs();
+      _loadPrefs();
     });
   }
 
   _onTapSelectImageFromGallery(TodoItem item) async {
-    image.pickImage(source: ImageSource.gallery)
-        .then((img){
-            if (img != null) {
-              setState(() {
-                item.file = File(img.path);
-              });
-            }
-    }).catchError((error){
+    image.pickImage(source: ImageSource.gallery).then((img) {
+      if (img != null) {
+        setState(() {
+          item.file = File(img.path);
+          _savePrefs();
+          _loadPrefs();
+        });
+      }
+    }).catchError((error) {
       debugPrint("Hata: $error");
+
       /// Hata olduğu zaman çalışır
-    }).whenComplete((){
+    }).whenComplete(() {
       ///Herşey tamamlandığı zaman çalışır
     });
 
-    try{
+    /*try {
       var img = await image.pickImage(source: ImageSource.gallery);
       if (img != null) {
         setState(() {
           item.file = File(img.path);
         });
       }
-    }catch(exception){
+    } catch (exception) {
       ///
-    }
+    }*/
   }
 
   void _onTapDeleteRow(TodoItem item) {
     setState(() {
       items.remove(item);
+      _savePrefs();
     });
   }
 
   void _onTapAddNewRow(String text) {
-    focusNode.unfocus(); ///Klavye gizlemek için
+    focusNode.unfocus();
+
+    ///Klavye gizlemek için
     setState(() {
       items.add(TodoItem(text, false, null));
+      _savePrefs();
       userInput.clear();
     });
     //print(todo);
   }
 
   void _onTapUpdateRow(TodoItem item) {
-    text = item.text; ///Açışılta initialize edilmesi gerek.
+    text = item.text;
+
+    ///Açışılta initialize edilmesi gerek.
     showDialog(
       context: context,
       builder: ((context) => SimpleDialog(
@@ -153,12 +168,13 @@ class _ToDoAppState extends State<ToDoApp> {
                   text = value;
                 }),
                 initialValue: item.text,
-
               ),
               ElevatedButton(
                   onPressed: (() {
                     setState(() {
                       item.text = text;
+                      _savePrefs();
+                      _loadPrefs();
                     });
                     Navigator.pop(context);
                     //print(todo);
@@ -172,11 +188,16 @@ class _ToDoAppState extends State<ToDoApp> {
   void _onTapCheck(TodoItem item, bool isChecked) {
     setState(() {
       item.isChecked = isChecked;
+      _savePrefs();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    /* Aslında her setState'den sonra _savePrefs ve _loadPrefs yapmak yerine
+      setState'ler build kısmını tetikleyeceği için tam buraya _savePrefs ve _loadPrefs eklemeliyim.
+      Yada alternatif başka bir yaklaşım var mı?
+    */
     return Scaffold(
         appBar: AppBar(title: const Text("ToDo APP")),
         body: Column(
@@ -236,8 +257,10 @@ class _ToDoAppState extends State<ToDoApp> {
                     ),
                     leading: Checkbox(
                       value: item.isChecked,
-                      onChanged: (newValue) =>
-                          _onTapCheck(item, newValue ?? false),
+                      onChanged: (newValue) {
+                        _onTapCheck(item, newValue ?? false);
+                        _loadPrefs();
+                      },
                       activeColor: Colors.orange,
                     ),
                     trailing: Row(
@@ -277,12 +300,15 @@ class _ToDoAppState extends State<ToDoApp> {
                   TextFormField(
                     controller: userInput,
                     decoration: const InputDecoration(
-                      labelText: "Yeni görev ekleyiniz..",
+                      hintText: "Yeni görev ekleyiniz..",
                     ),
                     focusNode: focusNode,
                   ),
                   ElevatedButton(
-                      onPressed: () => _onTapAddNewRow(userInput.text),
+                      onPressed: () {
+                        _onTapAddNewRow(userInput.text);
+                        _loadPrefs();
+                      },
                       child: const Text("Ekle"))
                 ],
               ),
