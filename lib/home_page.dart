@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -27,6 +28,18 @@ import 'dart:convert';
 /// 0- Json serialization araştırılması gerken konular. Dart:Convert kütüphanesi ve JsonToDart plugini
 /// 1- Todo Nesnesinin json string olarak kaydedilmesi
 /// 2- Json nesnesinden todo objelerinin oluşturulması
+///
+///
+/// 06-10-2022 İncelemeler
+/// 1- Her fonksiyonu setState içerisine alman gerekmiyor.
+/// 2- setState fonksiyonu main thread üzerinde çalışmaktadır, o yüzden genelde asenkron çağrılar setState'ten önce tamamlanır, devamında setState çalıştırılır. _loadPrefs() fonksiyonunda not ekledim
+/// 3- loadPrefs fonksiyonunu her save'den sonra çalıştırman gerekmiyor. zaten senin veri modelin 'List<TodoItem> items = [];' olarak memory de yüklenmiş durumda.
+/// 4- o yüzden sadece veriyi senkronize etmek adına setState sonrasında savePrefs metodunu çalıştırman yeterli olucaktır.
+/// 5- savePrefs metodunun her güncellemeden sonra çağırılması aslında kod temizliği açısından doğru olmasada mevcut Model-View-Controller mimarisine uygun.
+/// 6- Normalde bu tarz işlerde MVVM tarzı bir yaklaşım ile TodoItem modelimiz için bir ViewModel oluşturup değişimlerde güncelleme işlemini oraya taşımamız gerekiyor
+/// 7- Fakat flutter'da ben daha çok Bloc mimarisi taraftarıyım. ilerleyen adımlarda o konuya da değiniyor olacağız.
+/// 8- aslınd initState() metodu içerisinde herhangi bir asenkron işlem sonrasında "setState" çağrısı yapıcak bir metod kullanıyor isek onu SchedulerBinding.instance.addPostFrameCallback içerisinden çağırmakta fayda var.
+/// 8- kimi durumlarda daha ilk frame oluşturulmadan setState çağrısı yapılabilir ve bu da hata olmasına sebep olur. bu fonksiton ilgili metodun bir sonraki (veya ilk) frame oluşturuldukan sonra çalıştırılmasını garanti ediyor
 class TodoItem {
   String text;
   bool isChecked;
@@ -66,29 +79,46 @@ class _ToDoAppState extends State<ToDoApp> {
   void initState() {
     super.initState();
     //_initSharedPrefs();
-    _loadPrefs();
+    // _loadPrefs();
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      _loadPrefs();
+    });
   }
 
   /*void _initSharedPrefs() async {
     sharedPreferences = await SharedPreferences.getInstance();
   }*/
 
+
   void _loadPrefs() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var todoString = sharedPreferences.get("todo");
 
-    print("---LOAD----");
-    setState(() {
-      if (todoString is String) {
-        var todoItems = jsonDecode(todoString);
-        if (todoItems is List) {
-          // for (var json in todoItems) {
-          //   items.add(TodoItem.fromJson(json));
-          // }
-          items = todoItems.map((e) => TodoItem.fromJson(e)).toList();
-        }
+    ///Serdar Düzenlenmiş kod
+    if (todoString is String) {
+      var todoItems = jsonDecode(todoString);
+      if (todoItems is List) {
+        // for (var json in todoItems) {
+        //   items.add(TodoItem.fromJson(json));
+        // }
+        items = todoItems.map((e) => TodoItem.fromJson(e)).toList();
       }
-    });
+    }
+    /// Set State işlem tamamlandıktan sonra çağırılabilir.
+    setState(() {});
+    /// Ahmet - Eski Kod
+    // print("---LOAD----");
+    // setState(() {
+    //   if (todoString is String) {
+    //     var todoItems = jsonDecode(todoString);
+    //     if (todoItems is List) {
+    //       // for (var json in todoItems) {
+    //       //   items.add(TodoItem.fromJson(json));
+    //       // }
+    //       items = todoItems.map((e) => TodoItem.fromJson(e)).toList();
+    //     }
+    //   }
+    // });
   }
 
   _savePrefs() async {
@@ -102,9 +132,10 @@ class _ToDoAppState extends State<ToDoApp> {
     var img = await image.pickImage(source: ImageSource.camera);
     setState(() {
       item.file = File(img!.path);
-      _savePrefs();
-      _loadPrefs();
+
+      // _loadPrefs();
     });
+    _savePrefs();
   }
 
   _onTapSelectImageFromGallery(TodoItem item) async {
@@ -112,9 +143,10 @@ class _ToDoAppState extends State<ToDoApp> {
       if (img != null) {
         setState(() {
           item.file = File(img.path);
-          _savePrefs();
-          _loadPrefs();
+          // _savePrefs();
+          // _loadPrefs();
         });
+        _savePrefs();
       }
     }).catchError((error) {
       debugPrint("Hata: $error");
@@ -139,8 +171,9 @@ class _ToDoAppState extends State<ToDoApp> {
   void _onTapDeleteRow(TodoItem item) {
     setState(() {
       items.remove(item);
-      _savePrefs();
+      // _savePrefs();
     });
+    _savePrefs();
   }
 
   void _onTapAddNewRow(String text) {
@@ -149,9 +182,10 @@ class _ToDoAppState extends State<ToDoApp> {
     ///Klavye gizlemek için
     setState(() {
       items.add(TodoItem(text, false, null));
-      _savePrefs();
+      // _savePrefs();
       userInput.clear();
     });
+    _savePrefs();
     //print(todo);
   }
 
@@ -259,7 +293,7 @@ class _ToDoAppState extends State<ToDoApp> {
                       value: item.isChecked,
                       onChanged: (newValue) {
                         _onTapCheck(item, newValue ?? false);
-                        _loadPrefs();
+                        // _loadPrefs();
                       },
                       activeColor: Colors.orange,
                     ),
@@ -307,7 +341,7 @@ class _ToDoAppState extends State<ToDoApp> {
                   ElevatedButton(
                       onPressed: () {
                         _onTapAddNewRow(userInput.text);
-                        _loadPrefs();
+                        // _loadPrefs();
                       },
                       child: const Text("Ekle"))
                 ],
