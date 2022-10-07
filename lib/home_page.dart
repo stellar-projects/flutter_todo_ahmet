@@ -106,6 +106,7 @@ class _ToDoAppState extends State<ToDoApp> {
     }
     /// Set State işlem tamamlandıktan sonra çağırılabilir.
     setState(() {});
+    
     /// Ahmet - Eski Kod
     // print("---LOAD----");
     // setState(() {
