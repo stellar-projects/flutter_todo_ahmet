@@ -18,9 +18,9 @@ class _PhotoViewState extends State<PhotoView> {
   void getApiData() async {
     var dio = Dio();
 
-    var _apiKey = "MW6caIG6yo22-AqmbB0186KtLMChtHs3Lj0V8wozNoc";
-    var response = await dio.get(
-        "https://api.unsplash.com/photos/?client_id=$_apiKey");
+    var apiKey = "MW6caIG6yo22-AqmbB0186KtLMChtHs3Lj0V8wozNoc";
+    var response =
+        await dio.get("https://api.unsplash.com/photos/?client_id=$apiKey");
 
     // jsonDecode == response.data diyebilir miyiz?
     // Çünkü sharedPrefs'de get ile aldığımız veriyi jsonDecode ile anlamlı hale getiriyorduk.
@@ -61,12 +61,15 @@ class _PhotoViewState extends State<PhotoView> {
       body: ListView.builder(
         padding: const EdgeInsets.all(15),
         itemCount: photos.length,
-        itemBuilder: (context, index) => CachedNetworkImage(
-          fit: BoxFit.fill,
-          imageUrl: photos[index].urls?["raw"],
-          height: 200,
-          width: double.infinity,
-          maxHeightDiskCache: 200,
+        itemBuilder: (context, index) => Card(
+          child: CachedNetworkImage(
+            placeholder: (context, url) => const CircularProgressIndicator(),
+            fit: BoxFit.fill,
+            imageUrl: photos[index].urls?["raw"],
+            height: 200,
+            width: double.infinity,
+            maxHeightDiskCache: 200,
+          ),
         ),
       ),
     );
