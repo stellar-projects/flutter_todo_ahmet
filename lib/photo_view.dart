@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +42,11 @@ class _PhotoViewState extends State<PhotoView> {
 
     setState(() {});
     //print(parsedJson.runtimeType);
-    //print(response.runtimeType);
+    //print(response.runtimeType); -> response
+
+    //print(parsedJson[0].runtimeType);
+    //var x = PhotosModel.fromJson(parsedJson[0]); // _internalLinkedHasMap <String, dynamic>
+    //print(x.runtimeType); // PhotosModel
   }
 
   @override
@@ -65,7 +71,7 @@ class _PhotoViewState extends State<PhotoView> {
           child: CachedNetworkImage(
             placeholder: (context, url) => const CircularProgressIndicator(),
             fit: BoxFit.fill,
-            imageUrl: photos[index].urls?["raw"],
+            imageUrl: photos[index].urls?.raw ?? "",
             height: 200,
             width: double.infinity,
             maxHeightDiskCache: 200,
