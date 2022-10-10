@@ -67,16 +67,20 @@ class _PhotoViewState extends State<PhotoView> {
       body: ListView.builder(
         padding: const EdgeInsets.all(15),
         itemCount: photos.length,
-        itemBuilder: (context, index) => Card(
-          child: CachedNetworkImage(
-            placeholder: (context, url) => const CircularProgressIndicator(),
-            fit: BoxFit.fill,
-            imageUrl: photos[index].urls?.raw ?? "",
-            height: 200,
-            width: double.infinity,
-            maxHeightDiskCache: 200,
-          ),
-        ),
+        itemBuilder: (context, index) {
+          /*var item = photos[index];
+          print(item.id);*/
+          return Card(
+            child: CachedNetworkImage(
+              placeholder: (context, url) => const CircularProgressIndicator(),
+              fit: BoxFit.fill,
+              imageUrl: photos[index].urls?.raw ?? "", //item.urls?.raw ?? "",
+              height: 200,
+              width: double.infinity,
+              maxHeightDiskCache: 200,
+            ),
+          );
+        },
       ),
     );
   }

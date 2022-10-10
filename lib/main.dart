@@ -1,5 +1,4 @@
-import 'package:app_todo/home_page.dart';
-import 'package:app_todo/photo_view.dart';
+import 'package:app_todo/photos_futurebuilder.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,12 +12,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: const PhotoView()
-        //const ToDoApp(),
-        );
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const PhotoViewFutureBuilder(),
+      //const PhotoView()
+      //const ToDoApp(),
+    );
   }
 }

@@ -11,6 +11,7 @@ class PhotosModel {
     id = json["id"];
     createdAt = json["created_at"];
     color = json["color"];
+    //urls = json["urls"];
     urls = json['urls'] != null ? Urls.fromJson(json['urls']) : null;
   }
 }
