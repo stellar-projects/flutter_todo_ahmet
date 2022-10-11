@@ -1,4 +1,5 @@
 import 'package:app_todo/photos_futurebuilder.dart';
+import 'package:app_todo/photos_with_bloc.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -16,7 +17,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const PhotoViewFutureBuilder(),
+      home: const ScreenPhotosWithBloc(),
+      // home: const PhotoViewFutureBuilder(),
       //const PhotoView()
       //const ToDoApp(),
     );

@@ -22,7 +22,7 @@ class _PhotoViewFutureBuilderState extends State<PhotoViewFutureBuilder> {
 
     var apiKey = "MW6caIG6yo22-AqmbB0186KtLMChtHs3Lj0V8wozNoc";
     var response =
-        await dio.get("https://api.unsplash.com/photos/?client_id=$apiKey");
+        await dio.get("https://api.unsplash.com/photos/?client_id=$apiKey&page=2");
 
     /*var x =
         await dio.post("https://api.unsplash.com/photos/?client_id=$apiKey",
@@ -77,10 +77,10 @@ class _PhotoViewFutureBuilderState extends State<PhotoViewFutureBuilder> {
                   return Card(
                     child: CachedNetworkImage(
                       placeholder: (context, url) =>
-                          const CircularProgressIndicator(),
-                      fit: BoxFit.fill,
+                          const Center(child: CircularProgressIndicator()),
+                      fit: BoxFit.cover,
                       imageUrl: item.urls?.raw ?? "",
-                      height: 200,
+                      // height: 200,
                       width: double.infinity,
                       maxHeightDiskCache: 200,
                     ),
@@ -90,7 +90,7 @@ class _PhotoViewFutureBuilderState extends State<PhotoViewFutureBuilder> {
             } else if (snapshot.hasError) {
               return const Center(child: Text("Hata Oluştu"));
             }
-            return const Center(child: CircularProgressIndicator());
+            return Container(child: const Center(child: CircularProgressIndicator()));
           },
         )
 
