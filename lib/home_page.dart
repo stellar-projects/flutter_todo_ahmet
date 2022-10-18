@@ -211,3 +211,13 @@ class _ToDoAppState extends State<ToDoApp> {
     );
   }
 }
+
+class WidgetTodoItem extends StatelessWidget {
+  final TodoItem item;
+  const WidgetTodoItem({Key? key, required this.item}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
