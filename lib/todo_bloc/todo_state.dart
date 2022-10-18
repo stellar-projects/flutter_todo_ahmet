@@ -29,3 +29,8 @@ class StateSelectImageFromGallery extends TodoState {
   final TodoItem item;
   StateSelectImageFromGallery(this.item);
 }
+
+class StateDidLoadItems extends TodoState{
+  final List<TodoItem> items;
+  StateDidLoadItems(this.items);
+}

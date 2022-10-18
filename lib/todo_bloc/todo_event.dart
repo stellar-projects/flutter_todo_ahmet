@@ -3,6 +3,8 @@ part of 'todo_bloc.dart';
 @immutable
 abstract class TodoEvent {}
 
+class EventLoadItems extends TodoEvent{}
+
 class EventDeleteItem extends TodoEvent {
   final List<TodoItem> items;
   final int index;
