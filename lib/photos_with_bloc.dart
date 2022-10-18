@@ -12,7 +12,6 @@ class ScreenPhotosWithBloc extends StatefulWidget {
 }
 
 class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
-
   final PhotoBloc _bloc = PhotoBloc();
 
   List<PhotosModel> photos = [];
@@ -30,16 +29,43 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
       appBar: AppBar(
         title: Text("Photo Bloc"),
       ),
-      body: BlocListener(
-        bloc: _bloc,
-        listener: (context, state){
-          if(state is StateDidReceivePhotos){
-            setState(() {
-              photos = state.photos;
-            });
-          }
-        },
-        child: photos.isEmpty ? const Center(child: CircularProgressIndicator(),) : _imageList(photos),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: BlocListener(
+              bloc: _bloc,
+              listener: (context, state) {
+                if (state is StateDidReceivePhotos) {
+                  setState(() {
+                    photos = state.photos.sublist(0, 3);
+                  });
+                }
+              },
+              child: photos.isEmpty
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : _imageList(photos),
+            ),
+          ),
+          BlocListener(
+            bloc: _bloc,
+            listener: (context, state) {
+              if (state is StateDeletedPhoto) {
+                setState(() {
+                  photos = state.photos;
+                });
+              }
+            },
+            child: ElevatedButton(
+              child: const Text("Çıkart"),
+              onPressed: () {
+                _bloc.add(EventDeletePhoto(photos));
+              },
+            ),
+          )
+        ],
       ),
       // body: BlocBuilder(
       //   bloc: _bloc,
@@ -56,22 +82,22 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
       // ),
     );
   }
-  
-  Widget _imageList(List<PhotosModel> photos)=>ListView.builder(
-    itemCount: photos.length,
-    itemBuilder: (context, index) {
-      var item = photos[index];
-      return Card(
-        child: CachedNetworkImage(
-          placeholder: (context, url) =>
-          const Center(child: CircularProgressIndicator()),
-          fit: BoxFit.cover,
-          imageUrl: item.urls?.raw ?? "",
-          // height: 200,
-          width: double.infinity,
-          maxHeightDiskCache: 200,
-        ),
+
+  Widget _imageList(List<PhotosModel> photos) => ListView.builder(
+        itemCount: photos.length,
+        itemBuilder: (context, index) {
+          var item = photos[index];
+          return Card(
+            child: CachedNetworkImage(
+              placeholder: (context, url) =>
+                  const Center(child: CircularProgressIndicator()),
+              fit: BoxFit.cover,
+              imageUrl: item.urls?.raw ?? "",
+              height: 200,
+              width: double.infinity,
+              maxHeightDiskCache: 200,
+            ),
+          );
+        },
       );
-    },
-  );
 }
