@@ -1,14 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
-import '../todo_bloc/todo_bloc.dart';
 import '../model/todo_model.dart';
+import '../todo_bloc/todo_bloc.dart';
 
 class ToDoApp extends StatefulWidget {
   const ToDoApp({super.key});
@@ -50,7 +46,7 @@ class _ToDoAppState extends State<ToDoApp> {
   void _handleBlocStates(BuildContext context, state) {
     if (state is StateDidLoadItems) {
       setState(() {
-        items = state.items;
+        // items = state.items;
       });
     }
   }

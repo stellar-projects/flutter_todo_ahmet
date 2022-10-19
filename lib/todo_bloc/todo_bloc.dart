@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:app_todo/repository/implementation/repository_todo_impl.dart';
+import 'package:app_todo/repository/interface/repository_todo.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,6 +16,9 @@ part 'todo_event.dart';
 part 'todo_state.dart';
 
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
+
+  final RepositoryTodo _repositoryTodo = RepositoryTodoSharedPrefs();
+
   List<TodoItem> items = [];
 
   TodoBloc() : super(TodoInitial()) {
@@ -123,7 +128,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
                   }),
                   child: const Text("Güncelle")),
             ],
-          )),
+          )
+      ),
     );
   }
 }

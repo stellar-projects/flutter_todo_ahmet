@@ -1,6 +1,4 @@
 import 'package:app_todo/screens/home_page.dart';
-import 'package:app_todo/screens/photos_futurebuilder.dart';
-import 'package:app_todo/screens/photos_with_bloc.dart';
 import 'package:flutter/material.dart';
 
 void main() {

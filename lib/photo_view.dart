@@ -1,11 +1,9 @@
-import 'dart:convert';
-
+import 'package:app_todo/model/photos_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'photos_model.dart';
 
 class PhotoView extends StatefulWidget {
   const PhotoView({super.key});

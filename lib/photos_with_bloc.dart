@@ -1,5 +1,5 @@
 import 'package:app_todo/bloc/photo_bloc.dart';
-import 'package:app_todo/photos_model.dart';
+import 'package:app_todo/model/photos_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,7 +38,7 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
               listener: (context, state) {
                 if (state is StateDidReceivePhotos) {
                   setState(() {
-                    photos = state.photos.sublist(0, 3);
+                    photos = state.photos.sublist(0, 3).cast<PhotosModel>();
                   });
                 }
               },

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:app_todo/model/photos_model.dart';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
-import 'package:meta/meta.dart';
 
 part 'photo_event.dart';
 part 'photo_state.dart';

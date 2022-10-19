@@ -1,14 +1,10 @@
-import 'dart:io';
-
+import 'package:app_todo/model/todo_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
 import 'todo_bloc/todo_bloc.dart';
-import 'todo_model.dart';
 
 class ToDoApp extends StatefulWidget {
   const ToDoApp({super.key});
@@ -44,9 +40,6 @@ class _ToDoAppState extends State<ToDoApp> {
       _bloc.add(EventLoadItems());
     });
   }
-
-
-
 
   void _onTapUpdateRow(TodoItem item) {
     text = item.text;
@@ -161,7 +154,7 @@ class _ToDoAppState extends State<ToDoApp> {
                             color: Colors.red,
                             icon: const Icon(Icons.delete),
                             onPressed: () {
-                              _bloc.add(EventDeleteItem(items, index));
+                              _bloc.add(EventDeleteItem(index));
                               //print(todo);
                             },
                           ),
@@ -198,7 +191,7 @@ class _ToDoAppState extends State<ToDoApp> {
                         onPressed: () {
                           //_onTapAddNewRow(userInput.text);
                           focusNode.unfocus();
-                          _bloc.add(EventAddNewItem(items, userInput.text));
+                          _bloc.add(EventAddNewItem(userInput.text));
                           userInput.clear();
                         },
                         child: const Text("Ekle")),
