@@ -5,7 +5,7 @@ abstract class TodoState {}
 
 class TodoInitial extends TodoState {}
 
-class StateDeleteItem extends TodoState {
+/*class StateDeleteItem extends TodoState {
   final List<TodoItem> items;
   StateDeleteItem(this.items);
 }
@@ -28,9 +28,9 @@ class StateTakePhotoWithCamera extends TodoState {
 class StateSelectImageFromGallery extends TodoState {
   final TodoItem item;
   StateSelectImageFromGallery(this.item);
-}
+}*/
 
-class StateDidLoadItems extends TodoState{
+class StateDidLoadItems extends TodoState {
   final List<TodoItem> items;
   StateDidLoadItems(this.items);
 }

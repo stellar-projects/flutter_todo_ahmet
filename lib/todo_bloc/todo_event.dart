@@ -3,18 +3,18 @@ part of 'todo_bloc.dart';
 @immutable
 abstract class TodoEvent {}
 
-class EventLoadItems extends TodoEvent{}
+class EventLoadItems extends TodoEvent {}
 
 class EventDeleteItem extends TodoEvent {
-  final List<TodoItem> items;
+  //final List<TodoItem> items;
   final int index;
-  EventDeleteItem(this.items, this.index);
+  EventDeleteItem(this.index);
 }
 
 class EventAddNewItem extends TodoEvent {
-  final List<TodoItem> items;
+  //final List<TodoItem> items;
   final String text;
-  EventAddNewItem(this.items, this.text);
+  EventAddNewItem(this.text);
 }
 
 class EventCheck extends TodoEvent {
@@ -33,4 +33,8 @@ class EventSelectImageFromGallery extends TodoEvent {
   EventSelectImageFromGallery(this.item);
 }
 
-//Update kısmı kaldı
+class EventUpdate extends TodoEvent {
+  final TodoItem item;
+  final BuildContext context;
+  EventUpdate(this.item, this.context);
+}
