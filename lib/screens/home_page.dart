@@ -46,7 +46,7 @@ class _ToDoAppState extends State<ToDoApp> {
   void _handleBlocStates(BuildContext context, state) {
     if (state is StateDidLoadItems) {
       setState(() {
-        // items = state.items;
+        items = state.items;
       });
     }
   }

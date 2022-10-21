@@ -16,7 +16,6 @@ part 'todo_event.dart';
 part 'todo_state.dart';
 
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
-
   final RepositoryTodo _repositoryTodo = RepositoryTodoSharedPrefs();
 
   List<TodoItem> items = [];
@@ -35,19 +34,20 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       EventDeleteItem event, Emitter<TodoState> emit) {
     items.removeAt(event.index);
     emit(StateDidLoadItems(items));
+    _repositoryTodo.saveData(items);
   }
 
   FutureOr<void> _onTapAddNewRow(
       EventAddNewItem event, Emitter<TodoState> emit) {
     items.add(TodoItem(event.text, false, null));
     emit(StateDidLoadItems(items));
+    _repositoryTodo.saveData(items);
   }
 
   FutureOr<void> _onTapCheck(EventCheck event, Emitter<TodoState> emit) {
     event.item.isChecked = event.isChecked;
-    // emit(StateIsChecked(event.item));
-    //print("--> ${event.item.i}");
     emit(StateDidLoadItems(items));
+    _repositoryTodo.saveData(items);
   }
 
   FutureOr<void> _onTapTakePhotoWithCamera(
@@ -57,8 +57,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     if (img != null) {
       event.item.file = File(img.path);
     }
-    //emit(StateTakePhotoWithCamera(event.item));
     emit(StateDidLoadItems(items));
+    _repositoryTodo.saveData(items);
   }
 
   FutureOr<void> _onTapSelectImageFromGallery(
@@ -70,29 +70,21 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       }
     }).catchError((error) {
       debugPrint("Hata: $error");
-    }).whenComplete(() {
-      //emit(StateSelectImageFromGallery(event.item));
-    });
+    }).whenComplete(() {});
     emit(StateDidLoadItems(items));
-    // var img = await image.pickImage(source: ImageSource.gallery);
-    // if (img != null) {
-    //   event.item.file = File(img.path);
-    // } else {
-    //   event.item.file = null;
-    // }
-    // emit(StateSelectImageFromGallery(event.item));
+    _repositoryTodo.saveData(items);
   }
 
-  void _savePrefs() async {
+  /*void _savePrefs() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String json = jsonEncode(items);
     print("***SAVE***");
     sharedPreferences.setString("todo", json);
-  }
+  }*/
 
   FutureOr<void> _onLoadItems(
       EventLoadItems event, Emitter<TodoState> emit) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    /*SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var todoString = sharedPreferences.get("todo");
 
     if (todoString is String) {
@@ -100,14 +92,17 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       if (todoItems is List) {
         items = todoItems.map((e) => TodoItem.fromJson(e)).toList();
       }
-    }
+    }*/
+
+    items = await _repositoryTodo.loadData();
     emit(StateDidLoadItems(items));
+    //emit(StateDidLoadItems(await _repositoryTodo.loadData()));
   }
 
   FutureOr<void> _onTapUpdateRow(
       EventUpdate event, Emitter<TodoState> emit) async {
     String text = "";
-    //text = event.item.text;
+    text = event.item.text;
     await showDialog(
       context: event.context,
       builder: ((context) => SimpleDialog(
@@ -123,13 +118,13 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
                     event.item.text = text;
 
                     Navigator.pop(context);
-                    //print(todo);
+
                     emit(StateDidLoadItems(items));
                   }),
                   child: const Text("Güncelle")),
             ],
-          )
-      ),
+          )),
     );
+    _repositoryTodo.saveData(items);
   }
 }

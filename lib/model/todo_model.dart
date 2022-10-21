@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 
 class TodoItem {
-  UniqueKey id = UniqueKey();
+  //UniqueKey id = UniqueKey();
   String text;
   bool isChecked;
   File? file;
