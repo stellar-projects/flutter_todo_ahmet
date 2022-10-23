@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:app_todo/injections/injection_container.dart';
 import 'package:app_todo/repository/implementation/repository_todo_impl.dart';
 import 'package:app_todo/repository/interface/repository_todo.dart';
 import 'package:bloc/bloc.dart';
@@ -47,7 +48,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   FutureOr<void> _onTapCheck(EventCheck event, Emitter<TodoState> emit) {
     event.item.isChecked = event.isChecked;
     emit(StateDidLoadItems(items));
-    _repositoryTodo.saveData(items);
+    //_repositoryTodo.saveData(items);
+    injections<RepositoryTodo>().saveData(items);
   }
 
   FutureOr<void> _onTapTakePhotoWithCamera(
@@ -75,28 +77,11 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     _repositoryTodo.saveData(items);
   }
 
-  /*void _savePrefs() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String json = jsonEncode(items);
-    print("***SAVE***");
-    sharedPreferences.setString("todo", json);
-  }*/
-
   FutureOr<void> _onLoadItems(
       EventLoadItems event, Emitter<TodoState> emit) async {
-    /*SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var todoString = sharedPreferences.get("todo");
-
-    if (todoString is String) {
-      var todoItems = jsonDecode(todoString);
-      if (todoItems is List) {
-        items = todoItems.map((e) => TodoItem.fromJson(e)).toList();
-      }
-    }*/
-
-    items = await _repositoryTodo.loadData();
+    //items = await _repositoryTodo.loadData();
+    items = await injections<RepositoryTodo>().loadData();
     emit(StateDidLoadItems(items));
-    //emit(StateDidLoadItems(await _repositoryTodo.loadData()));
   }
 
   FutureOr<void> _onTapUpdateRow(

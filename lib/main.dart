@@ -1,7 +1,10 @@
 import 'package:app_todo/screens/home_page.dart';
 import 'package:flutter/material.dart';
 
+import 'injections/injection_container.dart';
+
 void main() {
+  initializeInjections();
   runApp(const MyApp());
 }
 
