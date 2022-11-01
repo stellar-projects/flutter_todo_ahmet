@@ -15,3 +15,8 @@ class StateDeletedPhoto extends PhotoState {
   final List<PhotosModel> photos;
   StateDeletedPhoto(this.photos);
 }
+
+class StatePhotosFailure extends PhotoState{
+  final dynamic failure;
+  StatePhotosFailure(this.failure);
+}

@@ -15,6 +15,9 @@ class _PhotoViewFutureBuilderState extends State<PhotoViewFutureBuilder> {
   late Future<List<PhotosModel>> photos;
 
   Future<List<PhotosModel>> getApiData() async {
+
+
+
     var dio = Dio();
 
     var apiKey = "MW6caIG6yo22-AqmbB0186KtLMChtHs3Lj0V8wozNoc";
