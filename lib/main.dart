@@ -2,6 +2,7 @@ import 'package:app_todo/screens/home_page.dart';
 import 'package:flutter/material.dart';
 
 import 'injections/injection_container.dart';
+import 'screens/photos_with_bloc.dart';
 
 void main() {
   initializeInjections();
@@ -19,10 +20,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: //const ScreenPhotosWithBloc(),
-          // home: const PhotoViewFutureBuilder(),
-          //const PhotoView()
-          const ToDoApp(),
+      home: const ScreenPhotosWithBloc(),
+      // home: const PhotoViewFutureBuilder(),
+      //const PhotoView()
+      // const ToDoApp(),
     );
   }
 }

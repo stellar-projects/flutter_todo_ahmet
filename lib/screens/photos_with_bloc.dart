@@ -1,5 +1,6 @@
 import 'package:app_todo/bloc/photo_bloc.dart';
 import 'package:app_todo/model/photos_model.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,18 +17,43 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
 
   List<PhotosModel> photos = [];
 
+  // var errorName = "";
+
+  @override
+  void dispose() {
+    _bloc.close();
+
+    ///Bloclar mutlaka kapatılmalıdır.
+    super.dispose();
+  }
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _bloc.add(EventGetPhotos());
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      _bloc.add(EventGetPhotos());
+    });
+  }
+
+  void _handleBlocStates(BuildContext context, state) {
+    if (state is StateDidReceivePhotos) {
+      setState(() {
+        print("Fotolar Yüklendi");
+        photos = state.photos;
+      });
+    }
+    if (state is StatePhotosFailure) {
+      print("Error");
+      // setState(() {
+      // });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Photo Bloc"),
+        title: const Text("Photo Bloc"),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -35,51 +61,16 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
           Expanded(
             child: BlocListener(
               bloc: _bloc,
-              listener: (context, state) {
-                if (state is StateDidReceivePhotos) {
-                  setState(() {
-                    photos = state.photos.sublist(0, 3);
-                  });
-                }
-              },
+              listener: _handleBlocStates,
               child: photos.isEmpty
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
                   : _imageList(photos),
             ),
-          ),
-          BlocListener(
-            bloc: _bloc,
-            listener: (context, state) {
-              if (state is StateDeletedPhoto) {
-                setState(() {
-                  photos = state.photos;
-                });
-              }
-            },
-            child: ElevatedButton(
-              child: const Text("Çıkart"),
-              onPressed: () {
-                _bloc.add(EventDeletePhoto(photos));
-              },
-            ),
           )
         ],
       ),
-      // body: BlocBuilder(
-      //   bloc: _bloc,
-      //   builder: (BuildContext context, state) {
-      //     if(state is StateDidReceivePhotos){
-      //       print("Did receive ohoto: ${state.photos.length}");
-      //       return _imageList(state.photos);
-      //     }else if(state is StateLoading){
-      //       return const Center(child: Text("Loading State"),);
-      //     }
-      //     return const Center(child: CircularProgressIndicator(),);
-      //   },
-      //
-      // ),
     );
   }
 

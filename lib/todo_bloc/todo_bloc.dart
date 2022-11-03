@@ -82,6 +82,9 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     //items = await _repositoryTodo.loadData();
     items = await injections<RepositoryTodo>().loadData();
     emit(StateDidLoadItems(items));
+
+    // Bu kullanımın bir farkı var mı?
+    //items = await injections.get<RepositoryTodo>().loadData();
   }
 
   FutureOr<void> _onTapUpdateRow(
