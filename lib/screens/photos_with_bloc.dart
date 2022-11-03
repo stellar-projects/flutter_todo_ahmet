@@ -43,9 +43,13 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
       });
     }
     if (state is StatePhotosFailure) {
-      print("Error");
-      // setState(() {
-      // });
+      debugPrint("HATA: ${state.failure?.description}");
+      showDialog(context: context, builder: (context){
+        return AlertDialog(
+          title: const Text("Hata"),
+          content: Text(state.failure?.description ?? "<tanımmız>"),
+        );
+      });
     }
   }
 

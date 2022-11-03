@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app_todo/injections/injection_container.dart';
+import 'package:app_todo/model/model_failure.dart';
 import 'package:app_todo/model/photos_model.dart';
 import 'package:app_todo/repository/implementation/repository_photos_impl.dart';
 import 'package:bloc/bloc.dart';

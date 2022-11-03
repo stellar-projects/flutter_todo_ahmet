@@ -12,6 +12,6 @@ class StateDidReceivePhotos extends PhotoState {
 class StateLoading extends PhotoState {}
 
 class StatePhotosFailure extends PhotoState {
-  final dynamic failure;
+  final Failure? failure;
   StatePhotosFailure(this.failure);
 }
