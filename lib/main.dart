@@ -1,6 +1,6 @@
 import 'package:app_todo/screens/home_page.dart';
+import 'package:app_todo/screens/screen_login.dart';
 import 'package:flutter/material.dart';
-
 import 'injections/injection_container.dart';
 import 'screens/photos_with_bloc.dart';
 
@@ -17,10 +17,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const ScreenPhotosWithBloc(),
+      home: const ScreenLogin(),
+      // const ScreenPhotosWithBloc(),
       // home: const PhotoViewFutureBuilder(),
       //const PhotoView()
       // const ToDoApp(),

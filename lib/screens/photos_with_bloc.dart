@@ -1,5 +1,8 @@
 import 'package:app_todo/bloc/photo_bloc.dart';
+import 'package:app_todo/google_sign_in.dart';
 import 'package:app_todo/model/photos_model.dart';
+import 'package:app_todo/screens/screen_login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +20,7 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
 
   List<PhotosModel> photos = [];
 
-  // var errorName = "";
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   void dispose() {
@@ -44,12 +47,14 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
     }
     if (state is StatePhotosFailure) {
       debugPrint("HATA: ${state.failure?.description}");
-      showDialog(context: context, builder: (context){
-        return AlertDialog(
-          title: const Text("Hata"),
-          content: Text(state.failure?.description ?? "<tanımmız>"),
-        );
-      });
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Hata"),
+              content: Text(state.failure?.description ?? "<tanımmız>"),
+            );
+          });
     }
   }
 
@@ -58,7 +63,44 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Photo Bloc"),
+        centerTitle: true,
       ),
+      drawer: Drawer(
+          child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          UserAccountsDrawerHeader(
+            accountName: Text("${user!.displayName}"),
+            accountEmail: Text("${user!.email}"),
+            currentAccountPicture: CircleAvatar(
+              child: ClipOval(
+                  child: Image.network(
+                user!.photoURL ?? "",
+                width: 90,
+                height: 90,
+                fit: BoxFit.cover,
+              )),
+            ),
+            decoration: const BoxDecoration(
+                color: Colors.blue,
+                image: DecorationImage(
+                    image: NetworkImage(
+                        "https://w.wallhaven.cc/full/ym/wallhaven-ymlyk7.jpg"),
+                    fit: BoxFit.cover)),
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout_outlined),
+            title: const Text("Çıkış Yap"),
+            onTap: () async {
+              await signOutWithGoogle();
+              bool mounted = true;
+              if (mounted != true) {}
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const ScreenLogin()));
+            },
+          ),
+        ],
+      )),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

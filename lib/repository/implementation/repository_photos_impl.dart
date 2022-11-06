@@ -13,21 +13,23 @@ class RepositoryPhotosDio extends RepositoryPhotos {
     var completer = Completer<Either<List<PhotosModel>, Failure?>>();
     var dio = Dio();
     var apiKey = "MW6caIG6yo22-AqmbB0186KtLMChtHs3Lj0V8wozNoc";
-    dio.get("https://api.unsplash.com/photos/?client_id=$apiKey")
-    .then((response){
+    dio
+        .get("https://api.unsplash.com/photos/?client_id=$apiKey")
+        .then((response) {
       var parsedJson = response.data;
-      var returnValue = <PhotosModel>[];
-      if(parsedJson is List){
+      List<PhotosModel> returnValue = <PhotosModel>[];
+      if (parsedJson is List) {
         returnValue = parsedJson.map((e) => PhotosModel.fromJson(e)).toList();
       }
       // return left(listPhotos);
       completer.complete(Left(returnValue));
-    }).catchError((error, stackTrace){
+    }).catchError((error, stackTrace) {
       debugPrint("Error: $error");
       debugPrint("Stack: $stackTrace");
-      if(error is DioError){
-        completer.complete(Right(NetworkFailure("${error.response?.statusCode} - ${error.message}", error)));
-      }else{
+      if (error is DioError) {
+        completer.complete(Right(NetworkFailure(
+            "${error.response?.statusCode} - ${error.message}", error)));
+      } else {
         completer.complete(Right(UnexpectedFailure("Beklenmedik hata", error)));
       }
     });
