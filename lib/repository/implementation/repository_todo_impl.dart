@@ -29,3 +29,21 @@ class RepositoryTodoSharedPrefs extends RepositoryTodo {
     sharedPreferences.setString("todo", json);
   }
 }
+
+/// 1- TODO listesi elemnanları '/todo/{user_id}/... path'ine ekleniyor  ve okunuyor olucak
+/// 2- TODO nesnen {"items":[TodoItem]}
+class RepositoryTodoFireStore extends RepositoryTodo{
+
+  @override
+  Future<List<TodoItem>> loadData() {
+
+    // TODO: implement loadData
+    throw UnimplementedError();
+  }
+
+  @override
+  void saveData(List<TodoItem> items) {
+    // TODO: implement saveData
+  }
+
+}
