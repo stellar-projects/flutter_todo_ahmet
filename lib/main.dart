@@ -1,5 +1,6 @@
 import 'package:app_todo/screens/home_page.dart';
 import 'package:app_todo/screens/screen_login.dart';
+import 'package:app_todo/screens/screen_splash.dart';
 import 'package:flutter/material.dart';
 import 'injections/injection_container.dart';
 import 'screens/photos_with_bloc.dart';
@@ -21,7 +22,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const ScreenLogin(),
+      home: const ScreenSplash(),
+      // const ScreenLogin(),
       // const ScreenPhotosWithBloc(),
       // home: const PhotoViewFutureBuilder(),
       //const PhotoView()
