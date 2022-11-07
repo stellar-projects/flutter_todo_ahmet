@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-abstract class Failure{
+abstract class Failure {
   String get description;
 }
 
@@ -16,12 +16,13 @@ class NetworkFailure extends Failure {
   // String toString() => message;
 }
 
-class UnexpectedFailure extends Failure{
+class UnexpectedFailure extends Failure {
   final String message;
   final dynamic error;
 
   UnexpectedFailure(this.message, this.error);
 
   @override
-  String get description => "Beklenmedik bir hata ile karşılaşıldı: $message\n\n$error";
+  String get description =>
+      "Beklenmedik bir hata ile karşılaşıldı: $message\n\n$error";
 }

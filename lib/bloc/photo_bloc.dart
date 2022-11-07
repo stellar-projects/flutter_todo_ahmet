@@ -17,7 +17,7 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     on<EventGetPhotos>(_onGetPhotos);
   }
 
-  final RepositoryPhotos _repositoryPhotos = RepositoryPhotosDio();
+  // final RepositoryPhotos _repositoryPhotos = RepositoryPhotosDio();
 
   FutureOr<void> _onGetPhotos(
       EventGetPhotos event, Emitter<PhotoState> emit) async {

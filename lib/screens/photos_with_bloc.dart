@@ -1,5 +1,5 @@
 import 'package:app_todo/bloc/photo_bloc.dart';
-import 'package:app_todo/google_sign_in.dart';
+import 'package:app_todo/services/google_services.dart';
 import 'package:app_todo/model/photos_model.dart';
 import 'package:app_todo/screens/screen_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,6 +21,7 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
   List<PhotosModel> photos = [];
 
   final user = FirebaseAuth.instance.currentUser;
+  // final navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void dispose() {
@@ -58,6 +59,11 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
     }
   }
 
+  void _goToLoginPage() {
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const ScreenLogin()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,7 +81,8 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
                   child: Image.network(
-                user!.photoURL ?? "",
+                user!.photoURL ??
+                    "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
                 width: 90,
                 height: 90,
                 fit: BoxFit.cover,
@@ -91,12 +98,10 @@ class _ScreenPhotosWithBlocState extends State<ScreenPhotosWithBloc> {
           ListTile(
             leading: const Icon(Icons.logout_outlined),
             title: const Text("Çıkış Yap"),
-            onTap: () async {
-              await signOutWithGoogle();
-              bool mounted = true;
-              if (mounted != true) {}
-              Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => const ScreenLogin()));
+            onTap: () {
+              signOutWithGoogle().then((value) => _goToLoginPage());
+              // Navigator.of(context).pushReplacement(
+              //     MaterialPageRoute(builder: (context) => const ScreenLogin()));
             },
           ),
         ],

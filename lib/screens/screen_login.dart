@@ -1,9 +1,11 @@
-import 'package:app_todo/google_sign_in.dart';
+import 'package:app_todo/services/google_services.dart';
 import 'package:app_todo/screens/photos_with_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
+
+import 'screen_register.dart';
 
 class ScreenLogin extends StatefulWidget {
   const ScreenLogin({super.key});
@@ -14,6 +16,8 @@ class ScreenLogin extends StatefulWidget {
 
 class _ScreenLoginState extends State<ScreenLogin> {
   bool isFirebaseInitialized = false;
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -23,39 +27,126 @@ class _ScreenLoginState extends State<ScreenLogin> {
 
   Future<void> initializeFirebase() async {
     await Firebase.initializeApp();
-    setState(() {
-      isFirebaseInitialized = true;
-    });
     // kullanıcı login olmuşsa
     if (FirebaseAuth.instance.currentUser != null) {
-      _goToLoginScreen();
+      _goToMainScreen();
     }
   }
 
-  void _goToLoginScreen() {
+  void _goToMainScreen() {
     Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const ScreenPhotosWithBloc()));
+  }
+
+  void _goToRegisterScreen() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const ScreenRegister()));
+  }
+
+  Future _signIn() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim());
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(e.code.replaceAll("-", " ")),
+              );
+            });
+      } else {
+        print(e.message);
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-            child: isFirebaseInitialized
-                ? SizedBox(
-                    height: 40,
-                    child:
-                        SignInButton(Buttons.GoogleDark, onPressed: () async {
-                      await signInWithGoogle();
-                      _goToLoginScreen();
-                    }),
-                  )
-                // ElevatedButton(
-                //     onPressed: () async {
-                //       await signInWithGoogle();
-                //       _goToLoginScreen();
-                //     },
-                // child: const Text("Google Sign In"))
-                : const CircularProgressIndicator()));
+        appBar: AppBar(
+          title: const Text("Giriş Yap"),
+          centerTitle: true,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: "Email")),
+              const SizedBox(height: 10),
+              TextField(
+                controller: passwordController,
+                decoration: const InputDecoration(labelText: "Şifre"),
+                obscureText: true,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(children: [
+                  Expanded(
+                      child: ElevatedButton(
+                    onPressed: () {
+                      // await _signIn();
+                      // emailController.clear();
+                      // passwordController.clear();
+                      // if (FirebaseAuth.instance.currentUser != null) {
+                      //   _goToMainScreen();
+                      // }
+                      _signIn().then((value) {
+                        emailController.clear();
+                        passwordController.clear();
+                        if (FirebaseAuth.instance.currentUser != null) {
+                          _goToMainScreen();
+                        }
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text("Sign In"),
+                  )),
+                  const SizedBox(width: 20),
+                  Expanded(
+                      child: ElevatedButton(
+                    onPressed: _goToRegisterScreen,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text("Sign Up"),
+                  )),
+                ]),
+              ),
+              const SizedBox(height: 40),
+              Center(
+                  child: SizedBox(
+                height: 40,
+                child: SignInButton(
+                  Buttons.GoogleDark,
+                  onPressed: () {
+                    // await signInWithGoogle();
+                    // _goToMainScreen();
+
+                    signInWithGoogle().then((value) {
+                      if (FirebaseAuth.instance.currentUser != null) {
+                        _goToMainScreen();
+                      }
+                    }).catchError((e) {
+                      print(e.toString());
+                    });
+                  },
+                ),
+              )),
+            ],
+          ),
+        ));
   }
 }
