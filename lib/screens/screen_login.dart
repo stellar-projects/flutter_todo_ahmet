@@ -1,3 +1,4 @@
+import 'package:app_todo/services/firebase_auth.dart';
 import 'package:app_todo/services/google_services.dart';
 import 'package:app_todo/screens/photos_with_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +20,8 @@ class _ScreenLoginState extends State<ScreenLogin> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  final AuthService _authService = AuthService();
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +30,9 @@ class _ScreenLoginState extends State<ScreenLogin> {
 
   Future<void> initializeFirebase() async {
     await Firebase.initializeApp();
+    setState(() {
+      isFirebaseInitialized = true;
+    });
     // kullanıcı login olmuşsa
     if (FirebaseAuth.instance.currentUser != null) {
       _goToMainScreen();
@@ -43,31 +49,6 @@ class _ScreenLoginState extends State<ScreenLogin> {
         .push(MaterialPageRoute(builder: (context) => const ScreenRegister()));
   }
 
-  Future _signIn() async {
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim());
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
-        showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text(e.code.replaceAll("-", " ")),
-              );
-            });
-      } else {
-        print(e.message);
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,78 +56,85 @@ class _ScreenLoginState extends State<ScreenLogin> {
           title: const Text("Giriş Yap"),
           centerTitle: true,
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: "Email")),
-              const SizedBox(height: 10),
-              TextField(
-                controller: passwordController,
-                decoration: const InputDecoration(labelText: "Şifre"),
-                obscureText: true,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(children: [
-                  Expanded(
-                      child: ElevatedButton(
-                    onPressed: () {
-                      // await _signIn();
-                      // emailController.clear();
-                      // passwordController.clear();
-                      // if (FirebaseAuth.instance.currentUser != null) {
-                      //   _goToMainScreen();
-                      // }
-                      _signIn().then((value) {
-                        emailController.clear();
-                        passwordController.clear();
-                        if (FirebaseAuth.instance.currentUser != null) {
-                          _goToMainScreen();
-                        }
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+        body: isFirebaseInitialized
+            ? Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextField(
+                        controller: emailController,
+                        decoration: const InputDecoration(labelText: "Email")),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: passwordController,
+                      decoration: const InputDecoration(labelText: "Şifre"),
+                      obscureText: true,
                     ),
-                    child: const Text("Sign In"),
-                  )),
-                  const SizedBox(width: 20),
-                  Expanded(
-                      child: ElevatedButton(
-                    onPressed: _goToRegisterScreen,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                    ),
-                    child: const Text("Sign Up"),
-                  )),
-                ]),
-              ),
-              const SizedBox(height: 40),
-              Center(
-                  child: SizedBox(
-                height: 40,
-                child: SignInButton(
-                  Buttons.GoogleDark,
-                  onPressed: () {
-                    // await signInWithGoogle();
-                    // _goToMainScreen();
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(children: [
+                        Expanded(
+                            child: ElevatedButton(
+                          onPressed: () {
+                            // _signIn().then((value) {
+                            //   emailController.clear();
+                            //   passwordController.clear();
+                            //   if (FirebaseAuth.instance.currentUser != null) {
+                            //     _goToMainScreen();
+                            //   }
+                            // });
 
-                    signInWithGoogle().then((value) {
-                      if (FirebaseAuth.instance.currentUser != null) {
-                        _goToMainScreen();
-                      }
-                    }).catchError((e) {
-                      print(e.toString());
-                    });
-                  },
+                            _authService
+                                .signIn(emailController.text.trim(),
+                                    passwordController.text.trim(), context)
+                                .then((value) {
+                              emailController.clear();
+                              passwordController.clear();
+                              if (FirebaseAuth.instance.currentUser != null) {
+                                _goToMainScreen();
+                              }
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          child: const Text("Sign In"),
+                        )),
+                        const SizedBox(width: 20),
+                        Expanded(
+                            child: ElevatedButton(
+                          onPressed: _goToRegisterScreen,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          child: const Text("Sign Up"),
+                        )),
+                      ]),
+                    ),
+                    const SizedBox(height: 40),
+                    Center(
+                        child: SizedBox(
+                      height: 40,
+                      child: SignInButton(
+                        Buttons.GoogleDark,
+                        onPressed: () {
+                          // await signInWithGoogle();
+                          // _goToMainScreen();
+
+                          signInWithGoogle().then((value) {
+                            if (FirebaseAuth.instance.currentUser != null) {
+                              _goToMainScreen();
+                            }
+                          }).catchError((e) {
+                            print(e.toString());
+                          });
+                        },
+                      ),
+                    )),
+                  ],
                 ),
-              )),
-            ],
-          ),
-        ));
+              )
+            : const Center(child: CircularProgressIndicator()));
   }
 }

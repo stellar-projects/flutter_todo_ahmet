@@ -3,6 +3,8 @@ import 'package:app_todo/screens/screen_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../services/firebase_auth.dart';
+
 class ScreenRegister extends StatefulWidget {
   const ScreenRegister({super.key});
 
@@ -13,30 +15,7 @@ class ScreenRegister extends StatefulWidget {
 class _ScreenRegisterState extends State<ScreenRegister> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
-  Future _signUp() async {
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-        showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text("${e.message}"),
-              );
-            });
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
+  final AuthService _authService = AuthService();
 
   void _goToMainScreen() {
     Navigator.of(context).push(
@@ -68,12 +47,15 @@ class _ScreenRegisterState extends State<ScreenRegister> {
                 padding: const EdgeInsets.all(12),
                 child: ElevatedButton(
                   onPressed: () {
-                    // await _signUp();
-                    // if (FirebaseAuth.instance.currentUser != null) {
-                    //   _goToMainScreen();
-                    // }
-
-                    _signUp().then((value) {
+                    // _signUp().then((value) {
+                    //   if (FirebaseAuth.instance.currentUser != null) {
+                    //     _goToMainScreen();
+                    //   }
+                    // });
+                    _authService
+                        .signUp(emailController.text.trim(),
+                            passwordController.text.trim(), context)
+                        .then((value) {
                       if (FirebaseAuth.instance.currentUser != null) {
                         _goToMainScreen();
                       }
