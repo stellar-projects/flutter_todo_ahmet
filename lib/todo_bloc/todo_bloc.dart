@@ -6,6 +6,8 @@ import 'package:app_todo/injections/injection_container.dart';
 import 'package:app_todo/repository/implementation/repository_todo_impl.dart';
 import 'package:app_todo/repository/interface/repository_todo.dart';
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
@@ -20,6 +22,9 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   final RepositoryTodo _repositoryTodo = RepositoryTodoSharedPrefs();
 
   List<TodoItem> items = [];
+  String uid = FirebaseAuth.instance.currentUser!.uid;
+  final CollectionReference<Map<String, dynamic>> db =
+      FirebaseFirestore.instance.collection("todo");
 
   TodoBloc() : super(TodoInitial()) {
     on<EventLoadItems>(_onLoadItems);
@@ -31,11 +36,12 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     on<EventUpdate>(_onTapUpdateRow);
   }
 
-  FutureOr<void> _onTapDeleteRow(
-      EventDeleteItem event, Emitter<TodoState> emit) {
+  Future<FutureOr<void>> _onTapDeleteRow(
+      EventDeleteItem event, Emitter<TodoState> emit) async {
     items.removeAt(event.index);
     emit(StateDidLoadItems(items));
-    _repositoryTodo.saveData(items);
+    await db.doc(uid).collection("items").doc(event.id).delete();
+    //_repositoryTodo.saveData(items);
   }
 
   FutureOr<void> _onTapAddNewRow(

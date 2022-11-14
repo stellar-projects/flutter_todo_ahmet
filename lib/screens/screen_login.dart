@@ -1,6 +1,7 @@
 import 'package:app_todo/services/firebase_auth.dart';
 import 'package:app_todo/services/google_services.dart';
 import 'package:app_todo/screens/photos_with_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +76,8 @@ class _ScreenLoginState extends State<ScreenLogin> {
                 child: Row(children: [
                   Expanded(
                       child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      print("pressed");
                       // _signIn().then((value) {
                       //   emailController.clear();
                       //   passwordController.clear();
@@ -84,16 +86,26 @@ class _ScreenLoginState extends State<ScreenLogin> {
                       //   }
                       // });
 
-                      _authService
-                          .signIn(emailController.text.trim(),
-                              passwordController.text.trim(), context)
-                          .then((value) {
-                        emailController.clear();
-                        passwordController.clear();
-                        if (FirebaseAuth.instance.currentUser != null) {
-                          _goToMainScreen();
-                        }
-                      });
+                      // await FirebaseFirestore.instance
+                      //     .collection("users")
+                      //     .doc("222")
+                      //     .set({
+                      //   "girisYaptiMi": true,
+                      // }, SetOptions(merge: true));
+                      await FirebaseFirestore.instance
+                          .collection("gönderiler")
+                          .get();
+
+                      // _authService
+                      //     .signIn(emailController.text.trim(),
+                      //         passwordController.text.trim(), context)
+                      //     .then((value) {
+                      //   emailController.clear();
+                      //   passwordController.clear();
+                      //   if (FirebaseAuth.instance.currentUser != null) {
+                      //     _goToMainScreen();
+                      //   }
+                      // });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,

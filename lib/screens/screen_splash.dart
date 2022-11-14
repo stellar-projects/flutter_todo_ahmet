@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_todo/screens/home_page.dart';
 import 'package:app_todo/screens/photos_with_bloc.dart';
 import 'package:app_todo/screens/screen_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -42,8 +43,10 @@ class _ScreenSplashState extends State<ScreenSplash> {
   }
 
   void _goToMainScreen() {
+    //Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const ScreenPhotosWithBloc()));
+
     Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const ScreenPhotosWithBloc()));
+        MaterialPageRoute(builder: (context) => const ToDoApp()));
   }
 
   void _goToLoginScreen() {

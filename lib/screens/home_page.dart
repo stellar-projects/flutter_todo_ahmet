@@ -106,17 +106,17 @@ class ListTileTodoItem extends StatelessWidget {
           const Spacer(),
           Column(
             children: [
-              Container(
-                width: 70,
-                height: 70,
-                color: Colors.black12,
-                child: item.file == null
-                    ? const Icon(Icons.image)
-                    : Image.file(
-                        item.file!,
-                        fit: BoxFit.fill,
-                      ),
-              ),
+              // Container(
+              //   width: 70,
+              //   height: 70,
+              //   color: Colors.black12,
+              //   child: item.file == null
+              //       ? const Icon(Icons.image)
+              //       : Image.file(
+              //           item.file!,
+              //           fit: BoxFit.fill,
+              //         ),
+              // ),
               Row(
                 children: [
                   IconButton(
@@ -152,7 +152,7 @@ class ListTileTodoItem extends StatelessWidget {
             color: Colors.red,
             icon: const Icon(Icons.delete),
             onPressed: () {
-              bloc.add(EventDeleteItem(index));
+              bloc.add(EventDeleteItem(index, item.id!));
             },
           ),
           // Builder

@@ -6,9 +6,9 @@ abstract class TodoEvent {}
 class EventLoadItems extends TodoEvent {}
 
 class EventDeleteItem extends TodoEvent {
-  //final List<TodoItem> items;
   final int index;
-  EventDeleteItem(this.index);
+  final String id;
+  EventDeleteItem(this.index, this.id);
 }
 
 class EventAddNewItem extends TodoEvent {
