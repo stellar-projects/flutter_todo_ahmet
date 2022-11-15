@@ -1,6 +1,6 @@
+import 'package:app_todo/screens/screen_todo.dart';
 import 'package:app_todo/services/firebase_auth.dart';
 import 'package:app_todo/services/google_services.dart';
-import 'package:app_todo/screens/photos_with_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -17,32 +17,14 @@ class ScreenLogin extends StatefulWidget {
 }
 
 class _ScreenLoginState extends State<ScreenLogin> {
-  // bool isFirebaseInitialized = false;
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   final AuthService _authService = AuthService();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   initializeFirebase();
-  // }
-
-  // Future<void> initializeFirebase() async {
-  //   await Firebase.initializeApp();
-  //   setState(() {
-  //     isFirebaseInitialized = true;
-  //   });
-  //   // kullanıcı login olmuşsa
-  //   if (FirebaseAuth.instance.currentUser != null) {
-  //     _goToMainScreen();
-  //   }
-  // }
-
   void _goToMainScreen() {
     Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const ScreenPhotosWithBloc()));
+        MaterialPageRoute(builder: (context) => const ScreenTodo()));
   }
 
   void _goToRegisterScreen() {
@@ -78,34 +60,17 @@ class _ScreenLoginState extends State<ScreenLogin> {
                       child: ElevatedButton(
                     onPressed: () async {
                       print("pressed");
-                      // _signIn().then((value) {
-                      //   emailController.clear();
-                      //   passwordController.clear();
-                      //   if (FirebaseAuth.instance.currentUser != null) {
-                      //     _goToMainScreen();
-                      //   }
-                      // });
 
-                      // await FirebaseFirestore.instance
-                      //     .collection("users")
-                      //     .doc("222")
-                      //     .set({
-                      //   "girisYaptiMi": true,
-                      // }, SetOptions(merge: true));
-                      await FirebaseFirestore.instance
-                          .collection("gönderiler")
-                          .get();
-
-                      // _authService
-                      //     .signIn(emailController.text.trim(),
-                      //         passwordController.text.trim(), context)
-                      //     .then((value) {
-                      //   emailController.clear();
-                      //   passwordController.clear();
-                      //   if (FirebaseAuth.instance.currentUser != null) {
-                      //     _goToMainScreen();
-                      //   }
-                      // });
+                      _authService
+                          .signIn(emailController.text.trim(),
+                              passwordController.text.trim(), context)
+                          .then((value) {
+                        emailController.clear();
+                        passwordController.clear();
+                        if (FirebaseAuth.instance.currentUser != null) {
+                          _goToMainScreen();
+                        }
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -130,9 +95,6 @@ class _ScreenLoginState extends State<ScreenLogin> {
                 child: SignInButton(
                   Buttons.GoogleDark,
                   onPressed: () {
-                    // await signInWithGoogle();
-                    // _goToMainScreen();
-
                     signInWithGoogle().then((value) {
                       if (FirebaseAuth.instance.currentUser != null) {
                         _goToMainScreen();

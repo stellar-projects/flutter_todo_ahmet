@@ -1,5 +1,5 @@
-import 'package:app_todo/screens/photos_with_bloc.dart';
 import 'package:app_todo/screens/screen_login.dart';
+import 'package:app_todo/screens/screen_todo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -18,8 +18,8 @@ class _ScreenRegisterState extends State<ScreenRegister> {
   final AuthService _authService = AuthService();
 
   void _goToMainScreen() {
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const ScreenPhotosWithBloc()));
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const ScreenTodo()));
   }
 
   @override
@@ -47,11 +47,6 @@ class _ScreenRegisterState extends State<ScreenRegister> {
                 padding: const EdgeInsets.all(12),
                 child: ElevatedButton(
                   onPressed: () {
-                    // _signUp().then((value) {
-                    //   if (FirebaseAuth.instance.currentUser != null) {
-                    //     _goToMainScreen();
-                    //   }
-                    // });
                     _authService
                         .signUp(emailController.text.trim(),
                             passwordController.text.trim(), context)

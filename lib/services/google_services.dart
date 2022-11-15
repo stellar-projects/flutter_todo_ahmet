@@ -22,7 +22,4 @@ Future<UserCredential> signInWithGoogle() async {
 Future<void> signOutWithGoogle() async {
   await FirebaseAuth.instance.signOut();
   await GoogleSignIn().signOut();
-  // FirebaseAuth.instance.currentUser!.email;
-  // FirebaseAuth.instance.currentUser!.displayName!
-  // FirebaseAuth.instance.currentUser!.profileUrl
 }

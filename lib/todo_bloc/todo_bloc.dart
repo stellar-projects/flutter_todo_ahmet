@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:app_todo/injections/injection_container.dart';
-import 'package:app_todo/repository/implementation/repository_todo_impl.dart';
 import 'package:app_todo/repository/interface/repository_todo.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,16 +8,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../model/todo_model.dart';
+import '../model/model_todo.dart';
 
 part 'todo_event.dart';
 part 'todo_state.dart';
 
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
-  final RepositoryTodo _repositoryTodo = RepositoryTodoSharedPrefs();
-
   List<TodoItem> items = [];
   String uid = FirebaseAuth.instance.currentUser!.uid;
   final CollectionReference<Map<String, dynamic>> db =
@@ -41,21 +35,24 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     items.removeAt(event.index);
     emit(StateDidLoadItems(items));
     await db.doc(uid).collection("items").doc(event.id).delete();
-    //_repositoryTodo.saveData(items);
   }
 
-  FutureOr<void> _onTapAddNewRow(
-      EventAddNewItem event, Emitter<TodoState> emit) {
-    items.add(TodoItem(event.text, false, null));
+  Future<FutureOr<void>> _onTapAddNewRow(
+      EventAddNewItem event, Emitter<TodoState> emit) async {
+    final newDocRef = db.doc(uid).collection("items").doc();
+    TodoItem todo = TodoItem(id: newDocRef.id.toString(), text: event.text);
+    items.add(todo);
+    newDocRef.set(todo.toMap());
+
     emit(StateDidLoadItems(items));
-    _repositoryTodo.saveData(items);
   }
 
   FutureOr<void> _onTapCheck(EventCheck event, Emitter<TodoState> emit) {
     event.item.isChecked = event.isChecked;
+    final checkRef = db.doc(uid).collection("items").doc(event.item.id);
+    checkRef.update({"isChecked": event.isChecked});
+
     emit(StateDidLoadItems(items));
-    //_repositoryTodo.saveData(items);
-    injections<RepositoryTodo>().saveData(items);
   }
 
   FutureOr<void> _onTapTakePhotoWithCamera(
@@ -63,10 +60,9 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     ImagePicker image = ImagePicker();
     var img = await image.pickImage(source: ImageSource.camera);
     if (img != null) {
-      event.item.file = File(img.path);
+      //event.item.file = File(img.path);
     }
     emit(StateDidLoadItems(items));
-    _repositoryTodo.saveData(items);
   }
 
   FutureOr<void> _onTapSelectImageFromGallery(
@@ -74,23 +70,18 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     ImagePicker image = ImagePicker();
     await image.pickImage(source: ImageSource.gallery).then((img) {
       if (img != null) {
-        event.item.file = File(img.path);
+        //event.item.file = File(img.path);
       }
     }).catchError((error) {
       debugPrint("Hata: $error");
     }).whenComplete(() {});
     emit(StateDidLoadItems(items));
-    _repositoryTodo.saveData(items);
   }
 
   FutureOr<void> _onLoadItems(
       EventLoadItems event, Emitter<TodoState> emit) async {
-    //items = await _repositoryTodo.loadData();
     items = await injections<RepositoryTodo>().loadData();
     emit(StateDidLoadItems(items));
-
-    // Bu kullanımın bir farkı var mı?
-    //items = await injections.get<RepositoryTodo>().loadData();
   }
 
   FutureOr<void> _onTapUpdateRow(
@@ -110,7 +101,9 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
               ElevatedButton(
                   onPressed: (() {
                     event.item.text = text;
-
+                    final updateRef =
+                        db.doc(uid).collection("items").doc(event.item.id);
+                    updateRef.update({"task": text});
                     Navigator.pop(context);
 
                     emit(StateDidLoadItems(items));
@@ -119,6 +112,5 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
             ],
           )),
     );
-    _repositoryTodo.saveData(items);
   }
 }

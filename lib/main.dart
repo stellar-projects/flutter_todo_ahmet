@@ -1,9 +1,8 @@
-import 'package:app_todo/screens/home_page.dart';
+import 'package:app_todo/screens/screen_todo.dart';
 import 'package:app_todo/screens/screen_login.dart';
 import 'package:app_todo/screens/screen_splash.dart';
 import 'package:flutter/material.dart';
 import 'injections/injection_container.dart';
-import 'screens/photos_with_bloc.dart';
 
 void main() {
   initializeInjections();
@@ -13,7 +12,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,11 +21,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const ScreenSplash(),
-      // const ScreenLogin(),
-      // const ScreenPhotosWithBloc(),
-      // home: const PhotoViewFutureBuilder(),
-      //const PhotoView()
-      // const ToDoApp(),
     );
   }
 }

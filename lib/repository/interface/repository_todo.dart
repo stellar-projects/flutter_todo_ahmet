@@ -1,6 +1,5 @@
-import 'package:app_todo/model/todo_model.dart';
+import 'package:app_todo/model/model_todo.dart';
 
 abstract class RepositoryTodo {
-  void saveData(List<TodoItem> items);
   Future<List<TodoItem>> loadData();
 }

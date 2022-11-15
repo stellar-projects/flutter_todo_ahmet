@@ -1,19 +1,23 @@
+import 'package:app_todo/screens/screen_login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../model/todo_model.dart';
+import '../model/model_todo.dart';
+import '../services/google_services.dart';
 import '../todo_bloc/todo_bloc.dart';
 
-class ToDoApp extends StatefulWidget {
-  const ToDoApp({super.key});
+import 'package:firebase_auth/firebase_auth.dart';
+
+class ScreenTodo extends StatefulWidget {
+  const ScreenTodo({super.key});
 
   @override
-  State<ToDoApp> createState() => _ToDoAppState();
+  State<ScreenTodo> createState() => _ScreenTodoState();
 }
 
-class _ToDoAppState extends State<ToDoApp> {
+class _ScreenTodoState extends State<ScreenTodo> {
   final FocusNode focusNode = FocusNode();
 
   List<TodoItem> items = [];
@@ -26,6 +30,7 @@ class _ToDoAppState extends State<ToDoApp> {
   late final SharedPreferences sharedPreferences;
 
   final TodoBloc _bloc = TodoBloc();
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   void dispose() {
@@ -51,10 +56,50 @@ class _ToDoAppState extends State<ToDoApp> {
     }
   }
 
+  void _goToLoginPage() {
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const ScreenLogin()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("ToDo APP")),
+        appBar: AppBar(title: const Text("ToDo APP"), centerTitle: true),
+        drawer: Drawer(
+            child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text("${user!.displayName}"),
+              accountEmail: Text("${user!.email}"),
+              currentAccountPicture: CircleAvatar(
+                child: ClipOval(
+                    child: Image.network(
+                  user!.photoURL ??
+                      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+                  width: 90,
+                  height: 90,
+                  fit: BoxFit.cover,
+                )),
+              ),
+              decoration: const BoxDecoration(
+                  color: Colors.blue,
+                  image: DecorationImage(
+                      image: NetworkImage(
+                          "https://w.wallhaven.cc/full/ym/wallhaven-ymlyk7.jpg"),
+                      fit: BoxFit.cover)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout_outlined),
+              title: const Text("Çıkış Yap"),
+              onTap: () {
+                signOutWithGoogle().then((value) => _goToLoginPage());
+                // Navigator.of(context).pushReplacement(
+                //     MaterialPageRoute(builder: (context) => const ScreenLogin()));
+              },
+            ),
+          ],
+        )),
         body: BlocListener(
           bloc: _bloc,
           listener: _handleBlocStates,
@@ -79,8 +124,6 @@ class _ToDoAppState extends State<ToDoApp> {
   }
 }
 
-// Sık sık kullanılan widgetlar için StatelessWidget'lar oluşturuyoruz.
-// Burada çeşitli birçok widget oluşturmanın bir mantığı var mı? Çünkü tekrar eden bir yapı yok.
 class ListTileTodoItem extends StatelessWidget {
   final TodoItem item;
   final TodoBloc bloc;
@@ -199,11 +242,24 @@ class CardTodo extends StatelessWidget {
             focusNode: focusNode,
           ),
           ElevatedButton(
-              onPressed: () {
-                //_onTapAddNewRow(userInput.text);
+              onPressed: () async {
                 focusNode.unfocus();
                 bloc.add(EventAddNewItem(userInput.text));
                 userInput.clear();
+                print("firebase");
+
+                // await FirebaseFirestore.instance
+                //     .collection("users")
+                //     .doc(FirebaseAuth.instance.currentUser?.uid ?? "")
+                //     .set({
+                //   "note": userInput.text,
+                // }, SetOptions(merge: true)).catchError((error, stacktrace) {
+                //   print("Firebase eror: $error");
+                //   print("stack: $stacktrace");
+                // }).then((value) {
+                //   print("complete");
+                // });
+                // print("complete 2");
               },
               child: const Text("Ekle")),
         ],

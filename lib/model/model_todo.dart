@@ -1,23 +1,11 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 
 class TodoItem {
   String? id;
   String text;
   bool isChecked;
   //File? file;
-  TodoItem({this.id, required this.text, required this.isChecked});
-
-  // Map<String, dynamic> toJson() {
-  //   return {"text": text, "isChecked": isChecked, "file": file?.path};
-  // }
-
-  // static TodoItem fromJson(Map<String, dynamic> json) {
-  //   return TodoItem(json["text"], json["isChecked"],
-  //       json["file"] == null ? null : File(json["file"]));
-  // }
+  TodoItem({required this.id, required this.text, this.isChecked = false});
 
   Map<String, dynamic> toMap() {
     return {

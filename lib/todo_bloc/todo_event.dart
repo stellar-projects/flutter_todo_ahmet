@@ -12,7 +12,6 @@ class EventDeleteItem extends TodoEvent {
 }
 
 class EventAddNewItem extends TodoEvent {
-  //final List<TodoItem> items;
   final String text;
   EventAddNewItem(this.text);
 }
