@@ -1,5 +1,6 @@
 import 'package:app_todo/screens/screen_todo.dart';
 import 'package:app_todo/services/firebase_auth.dart';
+import 'package:app_todo/services/firebase_firestore.dart';
 import 'package:app_todo/services/google_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,6 +22,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
   final passwordController = TextEditingController();
 
   final AuthService _authService = AuthService();
+  final FirestoreService _firestoreService = FirestoreService();
 
   void _goToMainScreen() {
     Navigator.of(context).pushReplacement(
@@ -59,8 +61,6 @@ class _ScreenLoginState extends State<ScreenLogin> {
                   Expanded(
                       child: ElevatedButton(
                     onPressed: () async {
-                      print("pressed");
-
                       _authService
                           .signIn(emailController.text.trim(),
                               passwordController.text.trim(), context)
@@ -68,6 +68,8 @@ class _ScreenLoginState extends State<ScreenLogin> {
                         emailController.clear();
                         passwordController.clear();
                         if (FirebaseAuth.instance.currentUser != null) {
+                          _firestoreService
+                              .addUser(FirebaseAuth.instance.currentUser);
                           _goToMainScreen();
                         }
                       });
@@ -97,6 +99,8 @@ class _ScreenLoginState extends State<ScreenLogin> {
                   onPressed: () {
                     signInWithGoogle().then((value) {
                       if (FirebaseAuth.instance.currentUser != null) {
+                        _firestoreService
+                            .addUser(FirebaseAuth.instance.currentUser);
                         _goToMainScreen();
                       }
                     }).catchError((e) {

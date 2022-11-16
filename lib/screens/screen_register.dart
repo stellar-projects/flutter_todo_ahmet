@@ -1,5 +1,6 @@
 import 'package:app_todo/screens/screen_login.dart';
 import 'package:app_todo/screens/screen_todo.dart';
+import 'package:app_todo/services/firebase_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,7 @@ class _ScreenRegisterState extends State<ScreenRegister> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final FirestoreService _firestoreService = FirestoreService();
 
   void _goToMainScreen() {
     Navigator.of(context)
@@ -52,6 +54,8 @@ class _ScreenRegisterState extends State<ScreenRegister> {
                             passwordController.text.trim(), context)
                         .then((value) {
                       if (FirebaseAuth.instance.currentUser != null) {
+                        _firestoreService
+                            .addUser(FirebaseAuth.instance.currentUser);
                         _goToMainScreen();
                       }
                     });

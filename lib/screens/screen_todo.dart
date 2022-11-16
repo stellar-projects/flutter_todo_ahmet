@@ -27,8 +27,6 @@ class _ScreenTodoState extends State<ScreenTodo> {
   String text = "";
   //ImagePicker image = ImagePicker();
 
-  late final SharedPreferences sharedPreferences;
-
   final TodoBloc _bloc = TodoBloc();
   final user = FirebaseAuth.instance.currentUser;
 
@@ -70,7 +68,7 @@ class _ScreenTodoState extends State<ScreenTodo> {
           padding: EdgeInsets.zero,
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text("${user!.displayName}"),
+              accountName: Text("${user?.displayName}"),
               accountEmail: Text("${user!.email}"),
               currentAccountPicture: CircleAvatar(
                 child: ClipOval(
@@ -246,20 +244,6 @@ class CardTodo extends StatelessWidget {
                 focusNode.unfocus();
                 bloc.add(EventAddNewItem(userInput.text));
                 userInput.clear();
-                print("firebase");
-
-                // await FirebaseFirestore.instance
-                //     .collection("users")
-                //     .doc(FirebaseAuth.instance.currentUser?.uid ?? "")
-                //     .set({
-                //   "note": userInput.text,
-                // }, SetOptions(merge: true)).catchError((error, stacktrace) {
-                //   print("Firebase eror: $error");
-                //   print("stack: $stacktrace");
-                // }).then((value) {
-                //   print("complete");
-                // });
-                // print("complete 2");
               },
               child: const Text("Ekle")),
         ],
