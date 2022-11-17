@@ -104,15 +104,18 @@ class _ScreenTodoState extends State<ScreenTodo> {
           child: Column(
             children: [
               Expanded(
-                child: ListView.separated(
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    var item = items[index];
-                    return ListTileTodoItem(
-                        item: item, bloc: _bloc, index: index);
-                  },
-                  separatorBuilder: (BuildContext context, int index) =>
-                      const Divider(),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0, left: 6, right: 6),
+                  child: ListView.separated(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      var item = items[index];
+                      return ListTileTodoItem(
+                          item: item, bloc: _bloc, index: index);
+                    },
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const Divider(),
+                  ),
                 ),
               ),
               CardTodo(bloc: _bloc, focusNode: focusNode, userInput: userInput)
@@ -147,17 +150,17 @@ class ListTileTodoItem extends StatelessWidget {
           const Spacer(),
           Column(
             children: [
-              // Container(
-              //   width: 70,
-              //   height: 70,
-              //   color: Colors.black12,
-              //   child: item.file == null
-              //       ? const Icon(Icons.image)
-              //       : Image.file(
-              //           item.file!,
-              //           fit: BoxFit.fill,
-              //         ),
-              // ),
+              Container(
+                width: 70,
+                height: 70,
+                color: Colors.black12,
+                child: item.itemUrl == null
+                    ? const Icon(Icons.image)
+                    : Image.network(
+                        item.itemUrl ?? "",
+                        fit: BoxFit.fill,
+                      ),
+              ),
               Row(
                 children: [
                   IconButton(

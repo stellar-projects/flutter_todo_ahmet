@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:app_todo/injections/injection_container.dart';
 import 'package:app_todo/repository/interface/repository_todo.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
@@ -20,6 +22,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   final CollectionReference<Map<String, dynamic>> db =
       FirebaseFirestore.instance.collection("todo");
 
+  final storageRef = FirebaseStorage.instance.ref();
+
   TodoBloc() : super(TodoInitial()) {
     on<EventLoadItems>(_onLoadItems);
     on<EventDeleteItem>(_onTapDeleteRow);
@@ -32,6 +36,11 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
 
   Future<FutureOr<void>> _onTapDeleteRow(
       EventDeleteItem event, Emitter<TodoState> emit) async {
+    if (items[event.index].itemUrl != null) {
+      await FirebaseStorage.instance
+          .refFromURL(items[event.index].itemUrl!)
+          .delete();
+    }
     items.removeAt(event.index);
     emit(StateDidLoadItems(items));
     await db.doc(uid).collection("items").doc(event.id).delete();
@@ -60,7 +69,12 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     ImagePicker image = ImagePicker();
     var img = await image.pickImage(source: ImageSource.camera);
     if (img != null) {
-      //event.item.file = File(img.path);
+      final itemImageRef = storageRef.child("images/$uid/${event.item.id}.jpg");
+      await itemImageRef.putFile(File(img.path));
+      final imageUrl = await itemImageRef.getDownloadURL();
+      event.item.itemUrl = imageUrl;
+      final itemRef = db.doc(uid).collection("items").doc(event.item.id);
+      itemRef.update({"itemImagePath": imageUrl});
     }
     emit(StateDidLoadItems(items));
   }
@@ -68,9 +82,17 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   FutureOr<void> _onTapSelectImageFromGallery(
       EventSelectImageFromGallery event, Emitter<TodoState> emit) async {
     ImagePicker image = ImagePicker();
-    await image.pickImage(source: ImageSource.gallery).then((img) {
+    await image.pickImage(source: ImageSource.gallery).then((img) async {
       if (img != null) {
-        //event.item.file = File(img.path);
+        final itemImageRef =
+            storageRef.child("images/$uid/${event.item.id}.jpg");
+
+        await itemImageRef.putFile(File(img.path));
+        final imageUrl = await itemImageRef.getDownloadURL();
+        event.item.itemUrl = imageUrl;
+
+        final itemRef = db.doc(uid).collection("items").doc(event.item.id);
+        itemRef.update({"itemImagePath": imageUrl});
       }
     }).catchError((error) {
       debugPrint("Hata: $error");

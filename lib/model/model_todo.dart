@@ -1,17 +1,24 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TodoItem {
-  String? id;
+  String id;
   String text;
   bool isChecked;
-  //File? file;
-  TodoItem({required this.id, required this.text, this.isChecked = false});
+  String? itemUrl;
+  TodoItem(
+      {required this.id,
+      required this.text,
+      this.isChecked = false,
+      this.itemUrl});
 
   Map<String, dynamic> toMap() {
     return {
       "id": id,
       "task": text,
       "isChecked": isChecked,
+      "itemImagePath": itemUrl
     };
   }
 
@@ -20,6 +27,7 @@ class TodoItem {
     return TodoItem(
         id: doc.id,
         text: doc.data()!["task"],
-        isChecked: doc.data()!["isChecked"]);
+        isChecked: doc.data()!["isChecked"],
+        itemUrl: doc.data()?["itemImagePath"] ?? "");
   }
 }
