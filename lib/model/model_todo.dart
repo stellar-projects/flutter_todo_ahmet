@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TodoItem {
@@ -28,6 +26,6 @@ class TodoItem {
         id: doc.id,
         text: doc.data()!["task"],
         isChecked: doc.data()!["isChecked"],
-        itemUrl: doc.data()?["itemImagePath"] ?? "");
+        itemUrl: doc.data()!["itemImagePath"]);
   }
 }

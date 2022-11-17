@@ -157,7 +157,7 @@ class ListTileTodoItem extends StatelessWidget {
                 child: item.itemUrl == null
                     ? const Icon(Icons.image)
                     : Image.network(
-                        item.itemUrl ?? "",
+                        item.itemUrl!,
                         fit: BoxFit.fill,
                       ),
               ),

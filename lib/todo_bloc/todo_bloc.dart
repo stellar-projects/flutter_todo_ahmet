@@ -37,9 +37,10 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   Future<FutureOr<void>> _onTapDeleteRow(
       EventDeleteItem event, Emitter<TodoState> emit) async {
     if (items[event.index].itemUrl != null) {
-      await FirebaseStorage.instance
-          .refFromURL(items[event.index].itemUrl!)
-          .delete();
+      // await FirebaseStorage.instance
+      //     .refFromURL(items[event.index].itemUrl!)
+      //     .delete();
+      storageRef.child("images/$uid/${items[event.index].id}.jpg").delete();
     }
     items.removeAt(event.index);
     emit(StateDidLoadItems(items));
