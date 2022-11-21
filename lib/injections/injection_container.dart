@@ -6,6 +6,7 @@ import '../repository/interface/repository_todo.dart';
 var injections = GetIt.instance;
 
 initializeInjections() {
-  injections
-      .registerLazySingleton<RepositoryTodo>(() => RepositoryTodoFireStore());
+
+  injections.registerFactory<RepositoryTodo>(() => RepositoryTodoFireStore());
+
 }

@@ -18,11 +18,15 @@ part 'todo_state.dart';
 
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
   List<TodoItem> items = [];
-  String uid = FirebaseAuth.instance.currentUser!.uid;
+  // String uid = FirebaseAuth.instance.currentUser!.uid;
+  String get uid => FirebaseAuth.instance.currentUser?.uid ?? "";
+
   final CollectionReference<Map<String, dynamic>> db =
       FirebaseFirestore.instance.collection("todo");
 
   final storageRef = FirebaseStorage.instance.ref();
+
+  final RepositoryTodo _repositoryTodo = injections();
 
   TodoBloc() : super(TodoInitial()) {
     on<EventLoadItems>(_onLoadItems);
@@ -43,8 +47,10 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       storageRef.child("images/$uid/${items[event.index].id}.jpg").delete();
     }
     items.removeAt(event.index);
-    emit(StateDidLoadItems(items));
-    await db.doc(uid).collection("items").doc(event.id).delete();
+
+    await db.doc(uid).collection("items").doc(event.id).delete()
+    .then((value) => emit(StateDidLoadItems(items)))
+    .catchError((value)=> emit(StateError(value)));
   }
 
   Future<FutureOr<void>> _onTapAddNewRow(
@@ -53,7 +59,6 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     TodoItem todo = TodoItem(id: newDocRef.id.toString(), text: event.text);
     items.add(todo);
     newDocRef.set(todo.toMap());
-
     emit(StateDidLoadItems(items));
   }
 
@@ -61,14 +66,13 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     event.item.isChecked = event.isChecked;
     final checkRef = db.doc(uid).collection("items").doc(event.item.id);
     checkRef.update({"isChecked": event.isChecked});
-
     emit(StateDidLoadItems(items));
   }
 
   FutureOr<void> _onTapTakePhotoWithCamera(
       EventTakePhotoWithCamera event, Emitter<TodoState> emit) async {
     ImagePicker image = ImagePicker();
-    var img = await image.pickImage(source: ImageSource.camera);
+    var img = await image.pickImage(source: ImageSource.camera,imageQuality: 80);
     if (img != null) {
       final itemImageRef = storageRef.child("images/$uid/${event.item.id}.jpg");
       await itemImageRef.putFile(File(img.path));
@@ -83,7 +87,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   FutureOr<void> _onTapSelectImageFromGallery(
       EventSelectImageFromGallery event, Emitter<TodoState> emit) async {
     ImagePicker image = ImagePicker();
-    await image.pickImage(source: ImageSource.gallery).then((img) async {
+    await image.pickImage(source: ImageSource.gallery,imageQuality: 80,).then((img) async {
       if (img != null) {
         final itemImageRef =
             storageRef.child("images/$uid/${event.item.id}.jpg");

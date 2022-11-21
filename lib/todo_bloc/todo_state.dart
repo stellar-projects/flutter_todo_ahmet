@@ -9,3 +9,8 @@ class StateDidLoadItems extends TodoState {
   final List<TodoItem> items;
   StateDidLoadItems(this.items);
 }
+
+class StateError extends TodoState{
+  final dynamic error;
+  StateError(this.error);
+}
