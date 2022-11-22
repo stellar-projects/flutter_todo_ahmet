@@ -26,15 +26,19 @@ class RepositoryTodoFirebase extends RepositoryTodo {
 
       completer.complete(Left(returnValue));
     }).catchError((error) {
-      completer.complete(Right(FirebaseFailure(error.toString())));
+      if (error is FirebaseException) {
+        completer.complete(Right(FirebaseFailure(error.message.toString())));
+      } else {
+        completer.complete(Right(UnexpectedFailure(error.toString())));
+      }
     });
     return completer.future;
   }
 
   @override
-  Future<Either<void, Failure?>> add(TodoItem item) {
+  Future<Either<void, Failure?>> add(TodoItem item) async {
     var completer = Completer<Either<void, Failure?>>();
-    db
+    await db
         .doc(uid)
         .collection("items")
         .doc(item.id)
@@ -42,7 +46,11 @@ class RepositoryTodoFirebase extends RepositoryTodo {
         .then((value) {
       completer.complete(const Left(null));
     }).catchError((error) {
-      completer.complete(Right(FirebaseFailure(error.toString())));
+      if (error is FirebaseException) {
+        completer.complete(Right(FirebaseFailure(error.message.toString())));
+      } else {
+        completer.complete(Right(UnexpectedFailure(error.toString())));
+      }
     });
     return completer.future;
   }
@@ -54,7 +62,11 @@ class RepositoryTodoFirebase extends RepositoryTodo {
     db.doc(uid).collection("items").doc(docId).delete().then((value) {
       completer.complete(const Left(null));
     }).catchError((error) {
-      completer.complete((Right(FirebaseFailure(error.toString()))));
+      if (error is FirebaseException) {
+        completer.complete(Right(FirebaseFailure(error.message.toString())));
+      } else {
+        completer.complete(Right(UnexpectedFailure(error.toString())));
+      }
     });
     return completer.future;
   }
@@ -66,8 +78,13 @@ class RepositoryTodoFirebase extends RepositoryTodo {
         .child("images/$uid/$docId.jpg")
         .delete()
         .then((value) => completer.complete(const Left(null)))
-        .catchError((error) =>
-            completer.complete(Right(FirebaseFailure(error.toString()))));
+        .catchError((error) {
+      if (error is FirebaseException) {
+        completer.complete(Right(FirebaseFailure(error.message.toString())));
+      } else {
+        completer.complete(Right(UnexpectedFailure(error.toString())));
+      }
+    });
     return completer.future;
   }
 
@@ -84,7 +101,11 @@ class RepositoryTodoFirebase extends RepositoryTodo {
           await storageRef.child("images/$uid/$docId.jpg").getDownloadURL();
       completer.complete(Left(imageUrl));
     }).catchError((error) {
-      completer.complete(Right(FirebaseFailure(error.toString())));
+      if (error is FirebaseException) {
+        completer.complete(Right(FirebaseFailure(error.message.toString())));
+      } else {
+        completer.complete(Right(UnexpectedFailure(error.toString())));
+      }
     });
     return completer.future;
   }
@@ -102,8 +123,14 @@ class RepositoryTodoFirebase extends RepositoryTodo {
           "itemImagePath": item.itemUrl
         })
         .then((value) => completer.complete(const Left(null)))
-        .catchError((error) =>
-            completer.complete(Right(FirebaseFailure(error.toString()))));
+        .catchError((error) {
+          if (error is FirebaseException) {
+            completer
+                .complete(Right(FirebaseFailure(error.message.toString())));
+          } else {
+            completer.complete(Right(UnexpectedFailure(error.toString())));
+          }
+        });
 
     return completer.future;
   }

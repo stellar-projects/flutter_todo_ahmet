@@ -5,6 +5,7 @@ abstract class Failure {
 
 class FirebaseFailure extends Failure {
   final String message;
+  //final dynamic error;
 
   FirebaseFailure(this.message);
   @override
@@ -13,6 +14,7 @@ class FirebaseFailure extends Failure {
 
 class UnexpectedFailure extends Failure {
   final String message;
+  //final dynamic error;
   UnexpectedFailure(this.message);
   @override
   String get description => "Beklenmedik bir hata ile karşılaşıldı: $message";
