@@ -52,6 +52,17 @@ class _ScreenTodoState extends State<ScreenTodo> {
         items = state.items;
       });
     }
+    if (state is StateError) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Hata"),
+            content: Text(state.failure?.description ?? "Hata Oluştu"),
+          );
+        },
+      );
+    }
   }
 
   void _goToLoginPage() {
@@ -196,7 +207,7 @@ class ListTileTodoItem extends StatelessWidget {
             color: Colors.red,
             icon: const Icon(Icons.delete),
             onPressed: () {
-              bloc.add(EventDeleteItem(index, item.id!));
+              bloc.add(EventDeleteItem(index, item.id));
             },
           ),
           // Builder

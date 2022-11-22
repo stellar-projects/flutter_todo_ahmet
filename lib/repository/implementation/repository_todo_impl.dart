@@ -1,50 +1,110 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:app_todo/model/model_failure.dart';
 import 'package:app_todo/model/model_todo.dart';
 import 'package:app_todo/repository/interface/repository_todo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
-class RepositoryTodoFireStore extends RepositoryTodo {
+class RepositoryTodoFirebase extends RepositoryTodo {
+  var db = FirebaseFirestore.instance.collection("todo");
+  String get uid => FirebaseAuth.instance.currentUser?.uid ?? "";
+  final storageRef = FirebaseStorage.instance.ref();
+
   @override
-  Future<List<TodoItem>> loadData() async {
-    final FirebaseFirestore db = FirebaseFirestore.instance;
+  Future<Either<List<TodoItem>, Failure?>> loadItems() async {
+    var completer = Completer<Either<List<TodoItem>, Failure?>>();
 
-    String uid = FirebaseAuth.instance.currentUser?.uid ?? "";
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await db.collection("todo").doc(uid).collection("items").get();
-    return snapshot.docs
-        .map((docSnapshot) => TodoItem.fromDocumentSnapshot(docSnapshot))
-        .toList();
+    await db.doc(uid).collection("items").get().then((snapshot) {
+      List<TodoItem> returnValue = [];
+      returnValue = snapshot.docs
+          .map((docSnapshot) => TodoItem.fromDocumentSnapshot(docSnapshot))
+          .toList();
+
+      completer.complete(Left(returnValue));
+    }).catchError((error) {
+      completer.complete(Right(FirebaseFailure(error.toString())));
+    });
+    return completer.future;
   }
 
   @override
   Future<Either<void, Failure?>> add(TodoItem item) {
-    // TODO: implement add
-    throw UnimplementedError();
+    var completer = Completer<Either<void, Failure?>>();
+    db
+        .doc(uid)
+        .collection("items")
+        .doc(item.id)
+        .set(item.toMap())
+        .then((value) {
+      completer.complete(const Left(null));
+    }).catchError((error) {
+      completer.complete(Right(FirebaseFailure(error.toString())));
+    });
+    return completer.future;
   }
 
   @override
-  Future<Either<String, Failure?>> addImage(String uid, String localFileUrl) {
-    // TODO: implement addImage
-    throw UnimplementedError();
+  Future<Either<void, Failure?>> delete(String docId) {
+    var completer = Completer<Either<void, Failure?>>();
+
+    db.doc(uid).collection("items").doc(docId).delete().then((value) {
+      completer.complete(const Left(null));
+    }).catchError((error) {
+      completer.complete((Right(FirebaseFailure(error.toString()))));
+    });
+    return completer.future;
   }
 
   @override
-  Future<Either<void, Failure?>> delete(String uid) {
-    // TODO: implement delete
-    throw UnimplementedError();
+  Future<Either<void, Failure?>> deleteFromStorage(String docId) {
+    var completer = Completer<Either<void, Failure?>>();
+    storageRef
+        .child("images/$uid/$docId.jpg")
+        .delete()
+        .then((value) => completer.complete(const Left(null)))
+        .catchError((error) =>
+            completer.complete(Right(FirebaseFailure(error.toString()))));
+    return completer.future;
   }
 
   @override
-  Future<Either<List<TodoItem>, Failure?>> loadItems() {
-    // TODO: implement loadItems
-    throw UnimplementedError();
+  Future<Either<String, Failure?>> addImage(
+      String docId, String localFileUrl) async {
+    var completer = Completer<Either<String, Failure?>>();
+
+    await storageRef
+        .child("images/$uid/$docId.jpg")
+        .putFile(File(localFileUrl))
+        .then((value) async {
+      var imageUrl =
+          await storageRef.child("images/$uid/$docId.jpg").getDownloadURL();
+      completer.complete(Left(imageUrl));
+    }).catchError((error) {
+      completer.complete(Right(FirebaseFailure(error.toString())));
+    });
+    return completer.future;
   }
 
   @override
-  Future<Either<void, Failure?>> update(TodoItem item) {
-    // TODO: implement update
-    throw UnimplementedError();
+  Future<Either<void, Failure?>> update(TodoItem item) async {
+    var completer = Completer<Either<void, Failure?>>();
+    await db
+        .doc(uid)
+        .collection("items")
+        .doc(item.id)
+        .update({
+          "task": item.text,
+          "isChecked": item.isChecked,
+          "itemImagePath": item.itemUrl
+        })
+        .then((value) => completer.complete(const Left(null)))
+        .catchError((error) =>
+            completer.complete(Right(FirebaseFailure(error.toString()))));
+
+    return completer.future;
   }
 }

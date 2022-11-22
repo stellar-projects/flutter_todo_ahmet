@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
 
+import '../model/model_failure.dart';
 import '../model/model_todo.dart';
 
 part 'todo_event.dart';
@@ -18,11 +19,10 @@ part 'todo_state.dart';
 
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
   List<TodoItem> items = [];
-  // String uid = FirebaseAuth.instance.currentUser!.uid;
+
   String get uid => FirebaseAuth.instance.currentUser?.uid ?? "";
 
-  final CollectionReference<Map<String, dynamic>> db =
-      FirebaseFirestore.instance.collection("todo");
+  final db = FirebaseFirestore.instance.collection("todo");
 
   final storageRef = FirebaseStorage.instance.ref();
 
@@ -44,71 +44,81 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       // await FirebaseStorage.instance
       //     .refFromURL(items[event.index].itemUrl!)
       //     .delete();
-      storageRef.child("images/$uid/${items[event.index].id}.jpg").delete();
+      await _repositoryTodo
+          .deleteFromStorage(event.id)
+          .then((value) => value.fold((l) => null, (r) => emit(StateError(r))));
     }
     items.removeAt(event.index);
-
-    await db.doc(uid).collection("items").doc(event.id).delete()
-    .then((value) => emit(StateDidLoadItems(items)))
-    .catchError((value)=> emit(StateError(value)));
+    await _repositoryTodo.delete(event.id).then((value) => value.fold(
+        (l) => emit(StateDidLoadItems(items)), (r) => emit(StateError(r))));
   }
 
   Future<FutureOr<void>> _onTapAddNewRow(
       EventAddNewItem event, Emitter<TodoState> emit) async {
     final newDocRef = db.doc(uid).collection("items").doc();
-    TodoItem todo = TodoItem(id: newDocRef.id.toString(), text: event.text);
-    items.add(todo);
-    newDocRef.set(todo.toMap());
-    emit(StateDidLoadItems(items));
+    TodoItem item = TodoItem(id: newDocRef.id.toString(), text: event.text);
+    items.add(item);
+
+    await _repositoryTodo.add(item).then((value) {
+      value.fold(
+          (l) => emit(StateDidLoadItems(items)), (r) => emit(StateError(r)));
+    });
   }
 
-  FutureOr<void> _onTapCheck(EventCheck event, Emitter<TodoState> emit) {
+  FutureOr<void> _onTapCheck(EventCheck event, Emitter<TodoState> emit) async {
     event.item.isChecked = event.isChecked;
-    final checkRef = db.doc(uid).collection("items").doc(event.item.id);
-    checkRef.update({"isChecked": event.isChecked});
-    emit(StateDidLoadItems(items));
+    await _repositoryTodo.update(event.item).then((value) => value.fold(
+        (l) => emit(StateDidLoadItems(items)), (r) => emit(StateError(r))));
   }
 
   FutureOr<void> _onTapTakePhotoWithCamera(
       EventTakePhotoWithCamera event, Emitter<TodoState> emit) async {
     ImagePicker image = ImagePicker();
-    var img = await image.pickImage(source: ImageSource.camera,imageQuality: 80);
-    if (img != null) {
-      final itemImageRef = storageRef.child("images/$uid/${event.item.id}.jpg");
-      await itemImageRef.putFile(File(img.path));
-      final imageUrl = await itemImageRef.getDownloadURL();
-      event.item.itemUrl = imageUrl;
-      final itemRef = db.doc(uid).collection("items").doc(event.item.id);
-      itemRef.update({"itemImagePath": imageUrl});
-    }
-    emit(StateDidLoadItems(items));
+
+    await image
+        .pickImage(source: ImageSource.camera, imageQuality: 80)
+        .then((img) async {
+      if (img != null) {
+        await _repositoryTodo.addImage(event.item.id, img.path).then((value) {
+          value.fold((l) => event.item.itemUrl = l, (r) => StateError(r));
+        });
+
+        await _repositoryTodo.update(event.item).then((value) => value.fold(
+            (l) => emit(StateDidLoadItems(items)), (r) => emit(StateError(r))));
+      }
+    }).catchError((error) {
+      emit(StateError(UnexpectedFailure(error.toString())));
+    });
   }
 
   FutureOr<void> _onTapSelectImageFromGallery(
       EventSelectImageFromGallery event, Emitter<TodoState> emit) async {
     ImagePicker image = ImagePicker();
-    await image.pickImage(source: ImageSource.gallery,imageQuality: 80,).then((img) async {
+    await image
+        .pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    )
+        .then((img) async {
       if (img != null) {
-        final itemImageRef =
-            storageRef.child("images/$uid/${event.item.id}.jpg");
+        await _repositoryTodo.addImage(event.item.id, img.path).then((value) {
+          value.fold((l) => event.item.itemUrl = l, (r) => StateError(r));
+        });
 
-        await itemImageRef.putFile(File(img.path));
-        final imageUrl = await itemImageRef.getDownloadURL();
-        event.item.itemUrl = imageUrl;
-
-        final itemRef = db.doc(uid).collection("items").doc(event.item.id);
-        itemRef.update({"itemImagePath": imageUrl});
+        await _repositoryTodo.update(event.item).then((value) => value.fold(
+            (l) => emit(StateDidLoadItems(items)), (r) => emit(StateError(r))));
       }
     }).catchError((error) {
-      debugPrint("Hata: $error");
-    }).whenComplete(() {});
-    emit(StateDidLoadItems(items));
+      emit(StateError(UnexpectedFailure(error.toString())));
+    });
   }
 
   FutureOr<void> _onLoadItems(
       EventLoadItems event, Emitter<TodoState> emit) async {
-    items = await injections<RepositoryTodo>().loadData();
-    emit(StateDidLoadItems(items));
+    await _repositoryTodo.loadItems().then((value) => value.fold((l) {
+          items = l;
+          emit(StateDidLoadItems(l));
+        }, (r) => emit(StateError(r))));
   }
 
   FutureOr<void> _onTapUpdateRow(
@@ -126,11 +136,11 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
                 initialValue: event.item.text,
               ),
               ElevatedButton(
-                  onPressed: (() {
+                  onPressed: (() async {
                     event.item.text = text;
-                    final updateRef =
-                        db.doc(uid).collection("items").doc(event.item.id);
-                    updateRef.update({"task": text});
+                    await _repositoryTodo.update(event.item).then((value) =>
+                        value.fold((l) => emit(StateDidLoadItems(items)),
+                            (r) => emit(StateError(r))));
                     Navigator.pop(context);
 
                     emit(StateDidLoadItems(items));

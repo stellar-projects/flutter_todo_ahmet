@@ -6,7 +6,5 @@ import '../repository/interface/repository_todo.dart';
 var injections = GetIt.instance;
 
 initializeInjections() {
-
-  injections.registerFactory<RepositoryTodo>(() => RepositoryTodoFireStore());
-
+  injections.registerFactory<RepositoryTodo>(() => RepositoryTodoFirebase());
 }
